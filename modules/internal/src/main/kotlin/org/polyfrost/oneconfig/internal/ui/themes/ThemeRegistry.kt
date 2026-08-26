@@ -10,6 +10,7 @@ import org.polyfrost.oneconfig.internal.ui.api.settings.BuiltinVisualizers
 import org.polyfrost.oneconfig.internal.ui.sound.UiSoundEvent
 import org.polyfrost.oneconfig.internal.ui.sound.UiSounds
 import org.polyfrost.oneconfig.internal.ui.sound.UiSoundTheme
+import org.polyfrost.oneconfig.internal.ui.themes.fork.DarkOrangeTheme
 
 object ThemeRegistry {
     internal val registry = mutableStateListOf<UITheme>()
@@ -22,6 +23,7 @@ object ThemeRegistry {
         register(PolyGlassLight)
         register(MinecraftDark)
         register(MinecraftLight)
+        register(DarkOrangeTheme)
 
         activeTheme = PolyGlassDark
         syncNotificationTheme(PolyGlassDark)

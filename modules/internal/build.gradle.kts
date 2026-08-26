@@ -47,6 +47,8 @@ dependencies {
     implementation(libs.jetbrains.skiko.awt.runtime.windows.x64)
 
     implementation(libs.commonmark)
+
+    testImplementation(kotlin("test"))
 }
 
 kotlin {

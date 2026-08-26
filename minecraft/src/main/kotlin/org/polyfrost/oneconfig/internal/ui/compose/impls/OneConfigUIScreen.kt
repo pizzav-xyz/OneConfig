@@ -30,6 +30,8 @@ import org.polyfrost.oneconfig.internal.ui.sound.UiSoundEvent
 import org.polyfrost.oneconfig.internal.ui.sound.UiSounds
 import org.polyfrost.oneconfig.api.platform.v1.Platform
 import org.polyfrost.oneconfig.internal.OneConfig
+import org.polyfrost.oneconfig.internal.ui.layout.fork.ForkConfigSurface
+import org.polyfrost.oneconfig.internal.ThemeConfig
 import kotlin.math.pow
 
 class OneConfigUIScreen @JvmOverloads constructor(
@@ -327,6 +329,12 @@ class OneConfigUIScreen @JvmOverloads constructor(
         val initialRoute = route ?: ModsGraph
 
         val containerSize = LocalWindowInfo.current.containerSize
+
+        if (ThemeConfig.activeTheme == "Dark Orange") {
+            ForkConfigSurface()
+            return
+        }
+
         OneConfigInterface(
             containerSize.width.toFloat(),
             containerSize.height.toFloat(),
