@@ -39,6 +39,7 @@ fun animateTheme(target: UITheme): UITheme {
 
     val shadowColor by animateColorAsState(target.shadowColor, colorSpec, label = "shadowColor")
     val controlThumbColor by animateColorAsState(target.controlThumbColor, colorSpec, label = "controlThumbColor")
+    val accentColor by animateColorAsState(target.accentColor, colorSpec, label = "accentColor")
 
     val backgroundShape = animateCornerShape(target.backgroundShape, spec)
     val sideBarNavigationEntryShape = animateCornerShape(target.sideBarNavigationEntryShape, spec)
@@ -66,7 +67,7 @@ fun animateTheme(target: UITheme): UITheme {
         checkBoxShape = checkBoxShape,
         buttonShape = buttonShape,
         popupShape = popupShape,
-    ).withControlTrackColor(controlTrackColor)
+    ).withAccentColor(accentColor).withControlTrackColor(controlTrackColor)
 }
 
 /**

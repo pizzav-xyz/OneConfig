@@ -27,14 +27,15 @@ object ForkRadii {
 /**
  * Dark-orange design-token table and single [UITheme] instance for the Fork's config surface.
  *
- * Colors are estimated from the Figma mock; final hex values are pending opaque Figma re-export.
+ * Accent decision (F5 P0): orange #FF7A45 is canonical for this fork.
+ * Rationale: (1) fork is named "Dark Orange" — orange IS the identity;
+ * (2) Figma spec uses peach/orange family (#FF8A65/#FF7A50);
+ * (3) controlTrackColor 0xFF5C3A2A is already warm/orange — accent must match;
+ * (4) the base OneConfig blue #2D5AFF was leaking through ThemeConfig defaults, not fork-intentional.
+ * Figma reference should be updated to match #FF7A45 as single source of truth.
+ *
  * The glass-vs-opaque decision is a single token swap via [Color.copy(alpha = ...)] on [pageBackground]
  * plus optional BlurRenderer backdrop usage — see task 2.1.4 / 2.3.1.
- *
- * TODO(2.3.1): Glass vs opaque is held pending opaque Figma re-export.
- *   Current tokens use alpha-baked glass intent (pageBackground ~75% opaque).
- *   To switch to solid, set pageBackground alpha to 0xFF and remove BlurRenderer backdrop.
- *   Issue: https://github.com/Polyfrost/OneConfig/issues/pending-figma-reexport
  */
 val DarkOrangeTheme = UITheme(
     previewImage = "fork/dark-orange",
@@ -82,4 +83,5 @@ val DarkOrangeTheme = UITheme(
             Font("assets/oneconfig/fonts/Poppins/Poppins-Thin.ttf", FontWeight.Thin)
         )
     )
-).withControlTrackColor(Color(0xFF5C3A2A))    // dark-orange track fill for sliders / toggles
+).withAccentColor(Color(0xFFFF7A45))       // Figma peach 500 — canonical accent for dark-orange fork
+  .withControlTrackColor(Color(0xFF5C3A2A)) // matching warm-orange unfilled track

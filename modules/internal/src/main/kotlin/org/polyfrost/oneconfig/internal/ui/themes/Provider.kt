@@ -2,38 +2,37 @@ package org.polyfrost.oneconfig.internal.ui.themes
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.toArgb
 import org.polyfrost.compose.render.PolyColor
 import org.polyfrost.oneconfig.api.notifications.v1.NotificationTheme
 import org.polyfrost.oneconfig.api.platform.v1.Platform
 import org.polyfrost.oneconfig.internal.OneConfigConfig
-import org.polyfrost.oneconfig.internal.ThemeConfig
 import org.polyfrost.oneconfig.internal.ui.DESIGN_HEIGHT_DP
 import org.polyfrost.oneconfig.internal.ui.DESIGN_WIDTH_DP
 import org.polyfrost.oneconfig.internal.ui.EDGE_MARGIN_FRACTION
 import kotlin.math.floor
 import kotlin.math.round
 
-private var _accent by mutableStateOf(Color(ThemeConfig.accentColor.argb))
+private var _accent by mutableStateOf(UITheme.DefaultAccentColor)
 
 val Accent: Color get() = _accent
 
-fun updateAccent() { _accent = Color(ThemeConfig.accentColor.argb) }
+fun updateAccent() {
+    val theme = ThemeRegistry.activeTheme ?: return
+    _accent = theme.accentColor
+}
 
 val LocalTheme = compositionLocalOf<UITheme> { error("A UI theme is required but was not provided") }
 
@@ -97,21 +96,10 @@ fun Theme(
     designHeight: Dp = DESIGN_HEIGHT_DP.dp,
     content: @Composable () -> Unit,
 ) {
-    _accent = Color(ThemeConfig.accentColor.argb)
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            if (ThemeConfig.accentColor.chroma) {
-                withFrameNanos { }
-                updateAccent()
-            } else {
-                delay(200)
-            }
-        }
-    }
-
     val target = ThemeRegistry.activeTheme ?: error("No active theme provided")
     val animated = animateTheme(target)
+
+    _accent = animated.accentColor
 
     SideEffect { syncNotificationTheme(animated) }
 

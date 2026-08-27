@@ -44,11 +44,25 @@ data class UITheme(
     var controlTrackColor: Color = DefaultControlTrackColor
         private set
 
+    /**
+     * Canonical accent color for this theme — used by toggle-on fill, slider fill,
+     * chip-selected background, dropdown-active border, keybind-dot, etc.
+     * Each theme must define its own accent via [withAccentColor] so the fork
+     * surface never inherits a mismatched blue from ThemeConfig defaults.
+     */
+    var accentColor: Color = DefaultAccentColor
+        private set
+
     fun withControlTrackColor(color: Color): UITheme =
         copy().also { it.controlTrackColor = color }
 
+    fun withAccentColor(color: Color): UITheme =
+        copy().also { it.accentColor = color }
+
     companion object {
         val DefaultControlTrackColor = Color(0xFF74777F)
+        /** Base OneConfig blue — only used by non-fork themes. */
+        val DefaultAccentColor = Color(0xFF2B4BFF)
     }
 }
 
