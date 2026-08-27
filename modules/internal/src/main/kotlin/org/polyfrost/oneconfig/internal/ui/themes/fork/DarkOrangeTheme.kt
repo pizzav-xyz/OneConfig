@@ -30,6 +30,11 @@ object ForkRadii {
  * Colors are estimated from the Figma mock; final hex values are pending opaque Figma re-export.
  * The glass-vs-opaque decision is a single token swap via [Color.copy(alpha = ...)] on [pageBackground]
  * plus optional BlurRenderer backdrop usage — see task 2.1.4 / 2.3.1.
+ *
+ * TODO(2.3.1): Glass vs opaque is held pending opaque Figma re-export.
+ *   Current tokens use alpha-baked glass intent (pageBackground ~75% opaque).
+ *   To switch to solid, set pageBackground alpha to 0xFF and remove BlurRenderer backdrop.
+ *   Issue: https://github.com/Polyfrost/OneConfig/issues/pending-figma-reexport
  */
 val DarkOrangeTheme = UITheme(
     previewImage = "fork/dark-orange",

@@ -81,12 +81,7 @@ fun ForkMultiSelectDropdown(
     )
     val chevronRotation by animateFloatAsState(if (expanded) 0f else 180f)
 
-    val count = selectedFlags.count { it }
-    val triggerLabel = when {
-        count == 0 -> "None selected"
-        count == options.size -> "All selected"
-        else -> "$count / ${options.size}"
-    }
+    val triggerLabel = formatCountLabel(selectedFlags, options.size)
 
     Box(modifier = modifier) {
         Row(
@@ -195,4 +190,19 @@ private fun ForkMultiselectItem(
             )
         }
     }
+}
+
+fun formatCountLabel(selectedFlags: BooleanArray, total: Int): String {
+    val count = selectedFlags.count { it }
+    return when {
+        count == 0 -> "None selected"
+        count == total -> "All selected"
+        else -> "$count / $total"
+    }
+}
+
+fun toggleFlag(flags: BooleanArray, index: Int): BooleanArray {
+    val copy = flags.copyOf()
+    if (index in copy.indices) copy[index] = !copy[index]
+    return copy
 }

@@ -48,5 +48,14 @@ loom.apply {
         // -Pdevauth=false launches offline for runs that do not need a real account
         property("devauth.enabled", (project.findProperty("devauth") ?: "true").toString())
         property("oneconfig.test", "true")
+        // E2E screenshot harness: pass -Pe2eTest=configui or -Doneconfig.e2e.test=configui
+        val e2eTest = project.findProperty("e2eTest") ?: project.findProperty("oneconfig.e2e.test") ?: System.getProperty("oneconfig.e2e.test")
+        e2eTest?.let { property("oneconfig.e2e.test", it.toString()) }
+        val e2eWorld = project.findProperty("e2eTest.world") ?: project.findProperty("oneconfig.e2e.test.world") ?: System.getProperty("oneconfig.e2e.test.world")
+        e2eWorld?.let { property("oneconfig.e2e.test.world", it.toString()) }
+        if (e2eTest != null) {
+            val world = e2eWorld?.toString() ?: "New World"
+            programArgs("--quickPlaySingleplayer", world)
+        }
     }
 }

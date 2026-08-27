@@ -32,6 +32,7 @@ import org.polyfrost.oneconfig.api.event.v1.events.InitializationEvent;
 import org.polyfrost.oneconfig.api.hud.v1.HudManager;
 import org.polyfrost.oneconfig.internal.ui.api.ConfigRegistry;
 import org.polyfrost.oneconfig.internal.ui.api.ConfigSource;
+import org.polyfrost.oneconfig.test.e2e.E2ETestRunner;
 
 public final class TestMod_Test {
     public static void initialize() {
@@ -49,5 +50,6 @@ public final class TestMod_Test {
             HudManager.register(new TestLegacyHud_Test(), "test_mod", "combat");
             HudManager.register(new TestItemHud_Test(), "test_mod");
         });
+        E2ETestRunner.init();
     }
 }
