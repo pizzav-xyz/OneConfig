@@ -2,7 +2,6 @@ package org.polyfrost.oneconfig.internal.ui.layout.fork
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +17,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -29,16 +30,16 @@ import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
-private val SidebarWidth = 52.dp
+private val SidebarWidth = 56.dp
 private val ItemSize = 36.dp
-private val IconSize = 20.dp
+private val IconSize = 14.dp
+private val RailBorderColor = Color(0xFF252A33)
 
 /**
- * Icon-only vertical navigation rail at exactly 52dp width.
+ * Icon-only vertical navigation rail at exactly 56dp width.
  *
- * Reuses upstream icon rendering (Icon() composable) for navigation entries.
- * Drops label text and the Account() expansion per the Fork's scope.
- * States: default, hover (distinct), selected (accent-background pill).
+ * Uses drawBehind for the right-edge border to avoid AA halo from Compose's
+ * default border rendering. Icon bounding box 14dp, text tint #A3AAC0.
  */
 @Composable
 fun IconSidebar(
@@ -53,9 +54,18 @@ fun IconSidebar(
         modifier = modifier
             .width(SidebarWidth)
             .fillMaxHeight()
+            .padding(vertical = 8.dp)
             .background(theme.sidebarBackground.withOpacityPercent(80f))
-            .border(1.dp, theme.borderColor.copy(alpha = 0.3f), theme.sideBarNavigationEntryShape),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .drawBehind {
+                // 1px right-edge border drawn via inset to avoid AA halo
+                drawLine(
+                    color = RailBorderColor,
+                    start = Offset(size.width - 0.5f, 0f),
+                    end = Offset(size.width - 0.5f, size.height),
+                    strokeWidth = 1f,
+                )
+            },
+        verticalArrangement = Arrangement.spacedBy(28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         entries.forEach { entry ->
@@ -74,7 +84,7 @@ fun IconSidebar(
                 when {
                     isSelected -> theme.accentTextColor
                     isHovered -> theme.textColor
-                    else -> theme.textColorSecondary
+                    else -> Color(0xFFA3AAC0)
                 }
             )
 

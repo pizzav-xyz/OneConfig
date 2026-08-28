@@ -37,7 +37,7 @@ private val CheckboxShape = RoundedCornerShape(ForkRadii.control)
  * Fork-scoped checkbox, adapted from CheckboxIndicator.
  *
  * ~16dp box, centered filled accent dot when checked (instead of tick icon).
- * All colors come from LocalTheme / Accent — no hard-coded literals.
+ * Border inset 0 to prevent overdraw; all colors from LocalTheme / Accent.
  */
 @Composable
 fun ForkCheckbox(
@@ -63,12 +63,11 @@ fun ForkCheckbox(
             .size(16.dp)
             .clip(CheckboxShape)
             .background(bgColor, CheckboxShape)
-            .border(1.5.dp, borderColor, CheckboxShape)
+            .border(1.dp, borderColor, CheckboxShape)
             .onClick(interactionSource) { onCheckedChange(!checked) }
             .pointerHoverIcon(PointerIcon.Hand),
         contentAlignment = Alignment.Center,
     ) {
-        // Centered filled-dot when checked, instead of a tick icon
         AnimatedVisibility(checked, enter = fadeIn(), exit = fadeOut()) {
             Box(
                 modifier = Modifier

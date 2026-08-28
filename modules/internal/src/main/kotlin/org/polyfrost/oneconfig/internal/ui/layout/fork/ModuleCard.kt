@@ -22,9 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +39,7 @@ import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.fork.ForkRadii
 
 private val CardShape = RoundedCornerShape(ForkRadii.card)
+private val InsetHighlightColor = androidx.compose.ui.graphics.Color(0x0FFFFFFF) // rgba(255,255,255,0.06)
 
 /**
  * Visual row inside a module card body.
@@ -104,7 +105,7 @@ fun ModuleCard(
     )
     val alpha by animateFloatAsState(if (!enabled) 0.5f else 1f)
 
-    Box(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(CardShape)
@@ -113,6 +114,15 @@ fun ModuleCard(
             .alpha(alpha)
             .onClick(interactionSource) {}
             .pointerHoverIcon(PointerIcon.Hand)
+            .drawBehind {
+                // 1px inset highlight at top masks body/footer seam at 4x zoom
+                drawLine(
+                    color = InsetHighlightColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    strokeWidth = 1f,
+                )
+            }
     ) {
         Column(
             modifier = Modifier
@@ -145,7 +155,6 @@ fun ModuleCard(
 
             Spacer(Modifier.height(ForkPadding.rowGap))
 
-            // Body: arbitrary sequence of control rows
             if (enabled) {
                 body()
             }

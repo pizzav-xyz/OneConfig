@@ -49,7 +49,18 @@ import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.concentric
 
-private val MenuPadding = 4.dp
+fun countSelectedFlags(flags: BooleanArray): Int = flags.count { it }
+
+fun formatMultiSelectLabel(count: Int, total: Int): String = when {
+    count == 0 -> "None selected"
+    count == total -> "All selected"
+    else -> "$count / $total"
+}
+
+fun toggleFlag(flags: BooleanArray, index: Int): BooleanArray {
+    require(index in flags.indices) { "Index $index out of bounds [0, ${flags.size})" }
+    return flags.copyOf().also { it[index] = !it[index] }
+}
 
 /**
  * Fork-scoped multi-select dropdown, adapted from MultiSelectDropdownOption.
@@ -81,7 +92,8 @@ fun ForkMultiSelectDropdown(
     )
     val chevronRotation by animateFloatAsState(if (expanded) 0f else 180f)
 
-    val triggerLabel = formatCountLabel(selectedFlags, options.size)
+    val count = countSelectedFlags(selectedFlags)
+    val triggerLabel = formatMultiSelectLabel(count, options.size)
 
     Box(modifier = modifier) {
         Row(
@@ -190,19 +202,4 @@ private fun ForkMultiselectItem(
             )
         }
     }
-}
-
-fun formatCountLabel(selectedFlags: BooleanArray, total: Int): String {
-    val count = selectedFlags.count { it }
-    return when {
-        count == 0 -> "None selected"
-        count == total -> "All selected"
-        else -> "$count / $total"
-    }
-}
-
-fun toggleFlag(flags: BooleanArray, index: Int): BooleanArray {
-    val copy = flags.copyOf()
-    if (index in copy.indices) copy[index] = !copy[index]
-    return copy
 }

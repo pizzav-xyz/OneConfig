@@ -17,6 +17,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
@@ -29,7 +31,7 @@ import kotlin.math.roundToInt
 /**
  * Fork-scoped slider, adapted from SliderControl.
  *
- * Thin track, round thumb, pointerInput drag, min/max/step snapping.
+ * Thin 4dp track, round thumb, pointerInput drag, min/max/step snapping.
  * All colors come from LocalTheme / Accent — no hard-coded literals.
  *
  * Pure-logic [snap] is extracted as a top-level function so it can be unit-tested.
@@ -43,7 +45,7 @@ fun ForkSlider(
     step: Float,
     modifier: Modifier = Modifier,
     thumbSize: Dp = 19.dp,
-    trackHeight: Dp = 5.dp,
+    trackHeight: Dp = 4.dp,
 ) {
     val theme = LocalTheme.current
     var trackWidthPx by remember { mutableStateOf(0f) }
@@ -94,7 +96,17 @@ fun ForkSlider(
                 .align(Alignment.CenterStart)
                 .offset { IntOffset((fraction * (trackWidthPx - thumbSize.toPx())).toInt(), 0) }
                 .size(thumbSize)
-                .background(theme.controlThumbColor, theme.circleShape)
+                .drawWithContent {
+                    // Solid 2px ring in track color prevents alpha-blend halo
+                    drawCircle(
+                        color = theme.controlTrackColor,
+                        radius = this.size.minDimension / 2f,
+                    )
+                    drawCircle(
+                        color = theme.controlThumbColor,
+                        radius = this.size.minDimension / 2f - 2.dp.toPx(),
+                    )
+                }
         )
     }
 }

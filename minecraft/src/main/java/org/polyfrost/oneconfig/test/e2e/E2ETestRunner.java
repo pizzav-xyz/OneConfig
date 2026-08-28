@@ -18,6 +18,7 @@ public class E2ETestRunner {
     private int ticksUntilRun = -1;
     private Runnable pendingCallback;
     private boolean worldLoaded = false;
+    private boolean testScheduled = false;
     private boolean allPassed = true;
 
     private E2ETestRunner() {
@@ -45,7 +46,8 @@ public class E2ETestRunner {
     }
 
     private void onTick(TickEvent.End event) {
-        if (worldLoaded && ticksUntilRun < 0 && pendingCallback == null) {
+        if (worldLoaded && !testScheduled) {
+            testScheduled = true;
             LOGGER.info("[TEST] world loaded, delaying 20 ticks");
             delayTicks(20, () -> {
                 LOGGER.info("[TEST] in world, running test");

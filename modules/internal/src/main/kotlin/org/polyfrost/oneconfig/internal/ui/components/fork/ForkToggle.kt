@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,10 +29,13 @@ import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 
+/** Explicit capsule shape: 36×18 r=9. */
+private val TrackShape = RoundedCornerShape(9.dp)
+
 /**
  * Fork-scoped toggle, adapted from SwitchControl.
  *
- * 42x21dp track, 15dp thumb, spring animation, on/off label.
+ * 36×18dp track, 14dp knob, 2dp inset, spring animation, on/off label.
  * All colors come from LocalTheme / Accent — no hard-coded literals.
  */
 @Composable
@@ -44,7 +48,8 @@ fun ForkToggle(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val trackColor by animateColorAsState(if (checked) Accent else LocalTheme.current.controlTrackColor)
-    val thumbOffset by animateDpAsState(if (checked) 24.dp else 3.dp, animationSpec = spring())
+    // 36×18 track, 14 knob, 2dp inset each side → off=2dp, on=36-14-2=20dp
+    val thumbOffset by animateDpAsState(if (checked) 20.dp else 2.dp, animationSpec = spring())
     val borderColor by animateColorAsState(
         if (isHovered) LocalTheme.current.textColor.copy(alpha = 0.15f) else Color.Transparent
     )
@@ -62,10 +67,10 @@ fun ForkToggle(
         )
         Box(
             modifier = Modifier
-                .size(42.dp, 21.dp)
-                .clip(LocalTheme.current.circleShape)
+                .size(36.dp, 18.dp)
+                .clip(TrackShape)
                 .background(trackColor)
-                .border(1.dp, borderColor, LocalTheme.current.circleShape)
+                .border(1.dp, borderColor, TrackShape)
                 .onClick(interactionSource) { onCheckedChange(!checked) }
                 .pointerHoverIcon(PointerIcon.Hand),
         ) {
@@ -73,7 +78,7 @@ fun ForkToggle(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .offset(x = thumbOffset)
-                    .size(15.dp)
+                    .size(14.dp)
                     .background(LocalTheme.current.controlThumbColor, LocalTheme.current.circleShape),
             )
         }

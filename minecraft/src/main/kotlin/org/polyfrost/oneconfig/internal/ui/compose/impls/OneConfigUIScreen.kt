@@ -32,6 +32,7 @@ import org.polyfrost.oneconfig.api.platform.v1.Platform
 import org.polyfrost.oneconfig.internal.OneConfig
 import org.polyfrost.oneconfig.internal.ui.layout.fork.ForkConfigSurface
 import org.polyfrost.oneconfig.internal.ThemeConfig
+import org.polyfrost.oneconfig.internal.ui.themes.Theme
 import kotlin.math.pow
 
 class OneConfigUIScreen @JvmOverloads constructor(
@@ -330,8 +331,10 @@ class OneConfigUIScreen @JvmOverloads constructor(
 
         val containerSize = LocalWindowInfo.current.containerSize
 
-        if (ThemeConfig.activeTheme == "Dark Orange") {
-            ForkConfigSurface()
+        if (ThemeConfig.activeTheme.startsWith("Dark Orange")) {
+            Theme {
+                ForkConfigSurface()
+            }
             return
         }
 

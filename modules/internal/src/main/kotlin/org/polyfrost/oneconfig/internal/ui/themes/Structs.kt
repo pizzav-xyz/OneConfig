@@ -40,24 +40,16 @@ data class UITheme(
     val branding: UIBranding,
     val typography: UITypography,
     val iconOverrides: Map<String, String> = emptyMap(),
+
+    /** Canonical accent — toggle-on fill, slider fill, chip-selected bg, dropdown active, keybind dot. */
+    val accentColor: Color = DefaultAccentColor,
+
+    /** Unfilled track color — warm brown for orange accent. */
+    val controlTrackColor: Color = DefaultControlTrackColor,
 ) {
-    var controlTrackColor: Color = DefaultControlTrackColor
-        private set
+    fun withControlTrackColor(color: Color): UITheme = copy(controlTrackColor = color)
 
-    /**
-     * Canonical accent color for this theme — used by toggle-on fill, slider fill,
-     * chip-selected background, dropdown-active border, keybind-dot, etc.
-     * Each theme must define its own accent via [withAccentColor] so the fork
-     * surface never inherits a mismatched blue from ThemeConfig defaults.
-     */
-    var accentColor: Color = DefaultAccentColor
-        private set
-
-    fun withControlTrackColor(color: Color): UITheme =
-        copy().also { it.controlTrackColor = color }
-
-    fun withAccentColor(color: Color): UITheme =
-        copy().also { it.accentColor = color }
+    fun withAccentColor(color: Color): UITheme = copy(accentColor = color)
 
     companion object {
         val DefaultControlTrackColor = Color(0xFF74777F)

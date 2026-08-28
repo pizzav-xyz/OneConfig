@@ -64,10 +64,6 @@ fun ModuleGrid(
                         )
                     }
                 }
-                // If odd module count, add empty filler for last row
-                if (rowModules.size == 1) {
-                    Box(modifier = Modifier.weight(1f))
-                }
             }
         }
     }

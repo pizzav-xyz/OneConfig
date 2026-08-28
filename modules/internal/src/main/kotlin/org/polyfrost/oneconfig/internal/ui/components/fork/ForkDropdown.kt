@@ -49,7 +49,11 @@ import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.concentric
 
-private val MenuPadding = 4.dp
+fun resolveDropdownLabel(options: List<String>, selectedIndex: Int): String =
+    options.getOrElse(selectedIndex) { "\u2014" }
+
+fun isValidSelectionIndex(options: List<String>, selectedIndex: Int): Boolean =
+    selectedIndex in options.indices
 
 /**
  * Fork-scoped single-select dropdown, adapted from DropdownOption.
@@ -98,7 +102,7 @@ fun ForkDropdown(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                options.getOrElse(selectedIndex) { "—" },
+                resolveDropdownLabel(options, selectedIndex),
                 modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp),
                 color = textColor,
                 fontSize = 13.sp,
