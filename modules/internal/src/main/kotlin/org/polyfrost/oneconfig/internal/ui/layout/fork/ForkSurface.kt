@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,11 +21,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
@@ -96,17 +99,32 @@ fun ForkConfigSurface(
                     .padding(horizontal = ForkTokens.Padding.dropdownPadding, vertical = ForkTokens.Spacing.controlRowGap),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = when {
-                        searchQuery.isBlank() -> "Search settings…"
-                        else -> searchQuery
-                    },
-                    color = if (searchQuery.isBlank()) theme.textColorSecondary else theme.textColor,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Normal,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                Icon("settings-search", color = theme.textColorSecondary, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(ForkTokens.Padding.dropdownDotGap))
+                BasicTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    singleLine = true,
+                    textStyle = TextStyle(
+                        color = theme.textColor,
+                        fontSize = 13.sp,
+                        fontFamily = theme.typography.family,
+                    ),
+                    cursorBrush = SolidColor(theme.textColor),
                     modifier = Modifier.weight(1f),
+                    decorationBox = { innerTextField ->
+                        if (searchQuery.isBlank()) {
+                            Text(
+                                text = "Search settings…",
+                                color = theme.textColorSecondary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Normal,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        innerTextField()
+                    },
                 )
             }
 
@@ -120,6 +138,7 @@ fun ForkConfigSurface(
                 onModuleToggle = { module, enabled ->
                     println("${module.id} enabled=$enabled")
                 },
+                searchQuery = searchQuery,
             )
         }
     }
