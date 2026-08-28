@@ -8,7 +8,6 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,14 +64,15 @@ fun ForkSettingRow(
             Text(
                 label,
                 color = theme.textColor,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
             )
             value?.let {
                 Text(
                     it,
                     color = theme.textColorSecondary,
                     fontSize = 11.sp,
+                    fontWeight = FontWeight.Normal,
                 )
             }
         }
@@ -115,7 +115,7 @@ fun ModuleCard(
             .onClick(interactionSource) {}
             .pointerHoverIcon(PointerIcon.Hand)
             .drawBehind {
-                // 1px inset highlight at top masks body/footer seam at 4x zoom
+                // inset highlight + subtle shadow for depth
                 drawLine(
                     color = InsetHighlightColor,
                     start = Offset(0f, 0f),
@@ -153,7 +153,14 @@ fun ModuleCard(
                 )
             }
 
-            Spacer(Modifier.height(ForkPadding.rowGap))
+            // header divider — 1px low-alpha border separates header from body per Figma
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = ForkPadding.rowGap)
+                    .height(1.dp)
+                    .background(theme.borderColor.copy(alpha = 0.08f))
+            )
 
             if (enabled) {
                 body()
