@@ -30,12 +30,12 @@ val DarkOrangeTheme = UITheme(
     name = "Dark Orange Fork",
 
     // Page / surface backgrounds — alpha controls glass-vs-opaque intent
-    pageBackground = Color(0xBF0F0F13),        // ~75% opaque; drop to ~40% for glass + BlurRenderer
-    sidebarBackground = Color(0xB3151C22),     // sidebar rail fill
-    chipBackground = Color(0xB2232D32),        // chip / tag surface
-    modCardBackground = Color(0x59232D32),     // card interior
-    componentBackground = Color(0xFF1A2229),   // control-row surface
-    popupBackground = Color(0xFF1A2229),       // dropdown / popup surface
+    pageBackground = Color(0x660F0F13),        // ~40% opaque for glass + BlurRenderer backdrop
+    sidebarBackground = Color(0x8B151C22),     // semi-transparent rail fill
+    chipBackground = Color(0x8B232D32),        // semi-transparent chip / tag surface
+    modCardBackground = Color(0x96232D32),     // semi-transparent card interior
+    componentBackground = Color(0xCC1A2229),   // control-row surface
+    popupBackground = Color(0xCC1A2229),       // dropdown / popup surface
 
     // Borders & text
     borderColor = Color(0x1AFFFFFF),           // 1px low-alpha border
