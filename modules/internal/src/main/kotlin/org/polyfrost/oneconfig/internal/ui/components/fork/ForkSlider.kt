@@ -29,10 +29,10 @@ import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import kotlin.math.roundToInt
 
 /**
- * Fork-scoped slider, adapted from SliderControl.
+ * Fork-scoped slider.
  *
- * Thin 4dp track, round thumb, pointerInput drag, min/max/step snapping.
- * All colors come from LocalTheme / Accent — no hard-coded literals.
+ * Thin track from [ForkTokens.Size.sliderTrack], round thumb from [ForkTokens.Size.sliderThumb],
+ * pointerInput drag, min/max/step snapping. All colors from LocalTheme / Accent.
  *
  * Pure-logic [snap] is extracted as a top-level function so it can be unit-tested.
  */
@@ -44,8 +44,8 @@ fun ForkSlider(
     max: Float,
     step: Float,
     modifier: Modifier = Modifier,
-    thumbSize: Dp = 19.dp,
-    trackHeight: Dp = 4.dp,
+    thumbSize: Dp = ForkTokens.Size.sliderThumb,
+    trackHeight: Dp = ForkTokens.Size.sliderTrack,
 ) {
     val theme = LocalTheme.current
     var trackWidthPx by remember { mutableStateOf(0f) }
@@ -97,14 +97,14 @@ fun ForkSlider(
                 .offset { IntOffset((fraction * (trackWidthPx - thumbSize.toPx())).toInt(), 0) }
                 .size(thumbSize)
                 .drawWithContent {
-                    // Solid 2px ring in track color prevents alpha-blend halo
+                    // Solid ring in track color prevents alpha-blend halo.
                     drawCircle(
                         color = theme.controlTrackColor,
                         radius = this.size.minDimension / 2f,
                     )
                     drawCircle(
                         color = theme.controlThumbColor,
-                        radius = this.size.minDimension / 2f - 2.dp.toPx(),
+                        radius = this.size.minDimension / 2f - ForkTokens.Size.sliderThumbRing.toPx(),
                     )
                 }
         )

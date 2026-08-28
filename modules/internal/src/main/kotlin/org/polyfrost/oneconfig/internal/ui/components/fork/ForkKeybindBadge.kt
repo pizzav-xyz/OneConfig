@@ -38,15 +38,12 @@ import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import org.polyfrost.oneconfig.internal.ui.themes.fork.ForkRadii
-
-private val BadgeShape = RoundedCornerShape(ForkRadii.control)
 
 /**
- * Fork-scoped keybind badge, adapted from KeybindOption.
+ * Fork-scoped keybind badge.
  *
  * Compact chip showing bound key or placeholder. Click to enter recording
- * state; Escape cancels and retains previous value.
+ * state; Escape cancels and retains previous value. Dimensions come from [ForkTokens].
  */
 @Composable
 fun ForkKeybindBadge(
@@ -85,7 +82,7 @@ fun ForkKeybindBadge(
 
     Row(
         modifier = modifier
-            .widthIn(min = 60.dp)
+            .widthIn(min = ForkTokens.Size.keybindMinWidth)
             .onKeyEvent { event ->
                 if (!recording) return@onKeyEvent false
                 when (event.type) {
@@ -108,18 +105,18 @@ fun ForkKeybindBadge(
             }
             .focusRequester(focusRequester)
             .focusable()
-            .background(bgColor, BadgeShape)
-            .border(1.dp, borderColor, BadgeShape)
+            .background(bgColor, ForkTokens.pillShape)
+            .border(ForkTokens.Size.controlBorder, borderColor, ForkTokens.pillShape)
             .onClick(interactionSource) { recording = !recording }
             .pointerHoverIcon(PointerIcon.Hand)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = ForkTokens.Padding.keybindHorizontal, vertical = ForkTokens.Padding.keybindVertical),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(ForkTokens.Padding.dropdownDotGap),
     ) {
         Icon(
             "keyboard",
             color = textColor,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier.size(ForkTokens.Size.keybindIcon),
         )
         Text(
             when {

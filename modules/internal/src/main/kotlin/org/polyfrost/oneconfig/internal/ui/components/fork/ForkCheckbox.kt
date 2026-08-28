@@ -29,14 +29,11 @@ import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import org.polyfrost.oneconfig.internal.ui.themes.fork.ForkRadii
-
-private val CheckboxShape = RoundedCornerShape(ForkRadii.control)
 
 /**
- * Fork-scoped checkbox, adapted from CheckboxIndicator.
+ * Fork-scoped checkbox.
  *
- * ~16dp box, centered filled accent dot when checked (instead of tick icon).
+ * 16dp box, centered filled accent dot when checked (instead of tick icon).
  * Border inset 0 to prevent overdraw; all colors from LocalTheme / Accent.
  */
 @Composable
@@ -60,10 +57,10 @@ fun ForkCheckbox(
 
     Box(
         modifier = modifier
-            .size(16.dp)
-            .clip(CheckboxShape)
-            .background(bgColor, CheckboxShape)
-            .border(1.dp, borderColor, CheckboxShape)
+            .size(ForkTokens.Size.checkbox)
+            .clip(ForkTokens.controlShape)
+            .background(bgColor, ForkTokens.controlShape)
+            .border(ForkTokens.Size.controlBorder, borderColor, ForkTokens.controlShape)
             .onClick(interactionSource) { onCheckedChange(!checked) }
             .pointerHoverIcon(PointerIcon.Hand),
         contentAlignment = Alignment.Center,
@@ -71,7 +68,7 @@ fun ForkCheckbox(
         AnimatedVisibility(checked, enter = fadeIn(), exit = fadeOut()) {
             Box(
                 modifier = Modifier
-                    .size(8.dp)
+                    .size(ForkTokens.Padding.checkboxDot)
                     .clip(LocalTheme.current.circleShape)
                     .background(Accent),
             )
@@ -91,7 +88,7 @@ fun ForkCheckboxControl(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(ForkTokens.Padding.toggleLabelGap),
         modifier = modifier,
     ) {
         Text(

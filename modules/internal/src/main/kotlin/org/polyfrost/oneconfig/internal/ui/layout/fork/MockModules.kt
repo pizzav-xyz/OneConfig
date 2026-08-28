@@ -20,7 +20,7 @@ import org.polyfrost.oneconfig.internal.ui.components.fork.ForkMultiSelectDropdo
 import org.polyfrost.oneconfig.internal.ui.layout.fork.ForkSettingRow
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkSlider
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
-import org.polyfrost.oneconfig.internal.ui.themes.fork.ForkRadii
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 
 /**
  * Static preview data for the Fork's module grid.
@@ -58,7 +58,7 @@ object MockModules {
                         step = 1f,
                     )
                 })
-                Spacer(Modifier.height(ForkRadii.control))
+                Spacer(Modifier.height(ForkTokens.Spacing.controlRowGap))
                 ForkSettingRow(label = "Target entity", control = {
                     ForkDropdown(
                         options = listOf("Players", "Mobs", "All"),
@@ -114,7 +114,7 @@ object MockModules {
                         onCheckedChange = {},
                     )
                 })
-                Spacer(Modifier.height(ForkRadii.control))
+                Spacer(Modifier.height(ForkTokens.Spacing.controlRowGap))
                 ForkSettingRow(label = "Mode", control = {
                     ForkDropdown(
                         options = listOf("Wireframe", "Solid"),
@@ -139,7 +139,7 @@ object MockModules {
                         step = 1f,
                     )
                 })
-                Spacer(Modifier.height(ForkRadii.control))
+                Spacer(Modifier.height(ForkTokens.Spacing.controlRowGap))
                 ForkSettingRow(label = "Vertical", value = "100%", control = {
                     ForkSlider(
                         value = 100f,

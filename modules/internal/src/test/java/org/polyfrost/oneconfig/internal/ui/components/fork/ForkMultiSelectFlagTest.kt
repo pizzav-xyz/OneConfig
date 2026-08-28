@@ -1,55 +1,122 @@
 package org.polyfrost.oneconfig.internal.ui.components.fork
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.assertThrows
 
 class ForkMultiSelectFlagTest {
 
+    // ── countSelectedFlags ──
+
     @Test
-    fun `toggle single flips flag`() {
+    fun `count returns 0 for all-false array`() {
         val flags = booleanArrayOf(false, false, false)
-        val toggled = toggleFlag(flags, 1)
-        assertTrue(toggled[1])
-        assertFalse(toggled[0])
-        assertFalse(flags[1])
+        assert(countSelectedFlags(flags) == 0)
     }
 
     @Test
-    fun `toggle all flips each flag`() {
+    fun `count returns full length for all-true array`() {
+        val flags = booleanArrayOf(true, true, true, true)
+        assert(countSelectedFlags(flags) == 4)
+    }
+
+    @Test
+    fun `count returns correct mixed value`() {
+        val flags = booleanArrayOf(true, false, true, false, true)
+        assert(countSelectedFlags(flags) == 3)
+    }
+
+    @Test
+    fun `count returns 0 for empty array`() {
+        val flags = booleanArrayOf()
+        assert(countSelectedFlags(flags) == 0)
+    }
+
+    @Test
+    fun `count returns 1 for single true`() {
+        val flags = booleanArrayOf(true)
+        assert(countSelectedFlags(flags) == 1)
+    }
+
+    // ── formatMultiSelectLabel ──
+
+    @Test
+    fun `label is None selected when count is 0`() {
+        assert(formatMultiSelectLabel(0, 5) == "None selected")
+    }
+
+    @Test
+    fun `label is All selected when count equals total`() {
+        assert(formatMultiSelectLabel(3, 3) == "All selected")
+    }
+
+    @Test
+    fun `label is count slash total otherwise`() {
+        assert(formatMultiSelectLabel(2, 5) == "2 / 5")
+    }
+
+    @Test
+    fun `label is 1 slash 1 when single option selected`() {
+        assert(formatMultiSelectLabel(1, 1) == "All selected")
+    }
+
+    @Test
+    fun `label is None selected when total is 0 and count is 0`() {
+        assert(formatMultiSelectLabel(0, 0) == "None selected")
+    }
+
+    // ── toggleFlag ──
+
+    @Test
+    fun `toggle flips false to true`() {
         val flags = booleanArrayOf(false, false, false)
-        var cur = flags
-        cur = toggleFlag(cur, 0)
-        cur = toggleFlag(cur, 1)
-        cur = toggleFlag(cur, 2)
-        assertTrue(cur.all { it })
+        val result = toggleFlag(flags, 1)
+        assert(result.contentEquals(booleanArrayOf(false, true, false)))
     }
 
     @Test
-    fun `formatCountLabel shows none selected`() {
-        assertEquals("None selected", formatCountLabel(booleanArrayOf(false, false, false), 3))
+    fun `toggle flips true to false`() {
+        val flags = booleanArrayOf(true, true, true)
+        val result = toggleFlag(flags, 0)
+        assert(result.contentEquals(booleanArrayOf(false, true, true)))
     }
 
     @Test
-    fun `formatCountLabel shows all selected`() {
-        assertEquals("All selected", formatCountLabel(booleanArrayOf(true, true, true), 3))
+    fun `toggle does not mutate original array`() {
+        val flags = booleanArrayOf(false, true, false)
+        val original = flags.copyOf()
+        toggleFlag(flags, 0)
+        assert(flags.contentEquals(original))
     }
 
     @Test
-    fun `formatCountLabel shows count summary`() {
-        assertEquals("2 / 3", formatCountLabel(booleanArrayOf(true, true, false), 3))
+    fun `toggle works on last index`() {
+        val flags = booleanArrayOf(true, true, false)
+        val result = toggleFlag(flags, 2)
+        assert(result.contentEquals(booleanArrayOf(true, true, true)))
     }
 
     @Test
-    fun `formatCountLabel handles empty flags`() {
-        assertEquals("None selected", formatCountLabel(booleanArrayOf(), 0))
+    fun `toggle throws on out-of-bounds index`() {
+        val flags = booleanArrayOf(false, false)
+        assertThrows<IllegalArgumentException> { toggleFlag(flags, 5) }
     }
 
     @Test
-    fun `toggle out of bounds leaves unchanged`() {
-        val flags = booleanArrayOf(true, false)
-        val out = toggleFlag(flags, 5)
-        assertEquals(flags.toList(), out.toList())
+    fun `toggle throws on negative index`() {
+        val flags = booleanArrayOf(false, false)
+        assertThrows<IllegalArgumentException> { toggleFlag(flags, -1) }
+    }
+
+    @Test
+    fun `multi-toggle sequence produces expected states`() {
+        var flags = booleanArrayOf(false, false, false)
+        flags = toggleFlag(flags, 0)
+        assert(flags.contentEquals(booleanArrayOf(true, false, false)))
+        flags = toggleFlag(flags, 2)
+        assert(flags.contentEquals(booleanArrayOf(true, false, true)))
+        flags = toggleFlag(flags, 0)
+        assert(flags.contentEquals(booleanArrayOf(false, false, true)))
+        assert(countSelectedFlags(flags) == 1)
+        assert(formatMultiSelectLabel(countSelectedFlags(flags), flags.size) == "1 / 3")
     }
 }

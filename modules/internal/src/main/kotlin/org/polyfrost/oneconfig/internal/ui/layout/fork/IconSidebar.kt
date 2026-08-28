@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,20 +25,20 @@ import androidx.compose.ui.unit.dp
 import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.railBorder
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.railIconTint
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
-private val SidebarWidth = 56.dp
-private val ItemSize = 36.dp
-private val IconSize = 14.dp
-private val RailBorderColor = Color(0xFF252A33)
-
 /**
- * Icon-only vertical navigation rail at exactly 56dp width.
+ * Icon-only vertical navigation rail.
  *
- * Uses drawBehind for the right-edge border to avoid AA halo from Compose's
- * default border rendering. Icon bounding box 14dp, text tint #A3AAC0.
+ * Dimensions are fully tokenised: width [ForkTokens.Size.sidebarWidth], padding [ForkTokens.Spacing.railPad],
+ * gap [ForkTokens.Spacing.railGap]. The right-edge border is drawn via `drawBehind` at an inset
+ * coordinate so the 1px line is absorbed inside the background fill — this removes the AA halo
+ * that Compose's default `border` modifier produces on integer boundaries.
  */
 @Composable
 fun IconSidebar(
@@ -49,23 +48,28 @@ fun IconSidebar(
     modifier: Modifier = Modifier,
 ) {
     val theme = LocalTheme.current
+    val width = ForkTokens.Size.sidebarWidth
+    val railPad = ForkTokens.Spacing.railPad
+    val railGap = ForkTokens.Spacing.railGap
+    val itemSize = ForkTokens.Size.sidebarItem
+    val iconSize = ForkTokens.Size.sidebarIcon
 
     Column(
         modifier = modifier
-            .width(SidebarWidth)
+            .width(width)
             .fillMaxHeight()
-            .padding(vertical = 8.dp)
+            .padding(vertical = railPad)
             .background(theme.sidebarBackground.withOpacityPercent(80f))
             .drawBehind {
-                // 1px right-edge border drawn via inset to avoid AA halo
+                // 1px right-edge border drawn at the inner inset so AA does not create a halo outside the rail.
                 drawLine(
-                    color = RailBorderColor,
+                    color = ForkTokens.railBorder,
                     start = Offset(size.width - 0.5f, 0f),
                     end = Offset(size.width - 0.5f, size.height),
                     strokeWidth = 1f,
                 )
             },
-        verticalArrangement = Arrangement.spacedBy(28.dp),
+        verticalArrangement = Arrangement.spacedBy(railGap),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         entries.forEach { entry ->
@@ -84,13 +88,13 @@ fun IconSidebar(
                 when {
                     isSelected -> theme.accentTextColor
                     isHovered -> theme.textColor
-                    else -> Color(0xFFA3AAC0)
+                    else -> ForkTokens.railIconTint
                 }
             )
 
             Box(
                 modifier = Modifier
-                    .size(ItemSize)
+                    .size(itemSize)
                     .clip(theme.sideBarNavigationEntryShape)
                     .background(bgColor, theme.sideBarNavigationEntryShape)
                     .onClick(interactionSource) { onSelected(entry.id) }
@@ -101,7 +105,7 @@ fun IconSidebar(
                 Icon(
                     entry.icon,
                     color = iconTint,
-                    modifier = Modifier.size(IconSize),
+                    modifier = Modifier.size(iconSize),
                 )
             }
         }

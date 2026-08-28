@@ -29,14 +29,14 @@ import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 
-/** Explicit capsule shape: 36×18 r=9. */
-private val TrackShape = RoundedCornerShape(9.dp)
+/** Explicit capsule shape driven by tokens. */
+private val TrackShape = RoundedCornerShape(ForkTokens.Radii.pill)
 
 /**
- * Fork-scoped toggle, adapted from SwitchControl.
+ * Fork-scoped toggle.
  *
- * 36×18dp track, 14dp knob, 2dp inset, spring animation, on/off label.
- * All colors come from LocalTheme / Accent — no hard-coded literals.
+ * Dimensions and spacing come from [ForkTokens]: 36×18 track, 14dp knob, 2dp inset,
+ * spring animation, on/off label. All colors from LocalTheme / Accent.
  */
 @Composable
 fun ForkToggle(
@@ -48,15 +48,18 @@ fun ForkToggle(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val trackColor by animateColorAsState(if (checked) Accent else LocalTheme.current.controlTrackColor)
-    // 36×18 track, 14 knob, 2dp inset each side → off=2dp, on=36-14-2=20dp
-    val thumbOffset by animateDpAsState(if (checked) 20.dp else 2.dp, animationSpec = spring())
+    val thumbOffset by animateDpAsState(
+        if (checked) ForkTokens.Size.toggleTrackWidth - ForkTokens.Size.toggleKnob - ForkTokens.Size.toggleInset
+        else ForkTokens.Size.toggleInset,
+        animationSpec = spring(),
+    )
     val borderColor by animateColorAsState(
         if (isHovered) LocalTheme.current.textColor.copy(alpha = 0.15f) else Color.Transparent
     )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(ForkTokens.Padding.toggleLabelGap),
         modifier = modifier,
     ) {
         Text(
@@ -67,10 +70,10 @@ fun ForkToggle(
         )
         Box(
             modifier = Modifier
-                .size(36.dp, 18.dp)
+                .size(ForkTokens.Size.toggleTrackWidth, ForkTokens.Size.toggleTrackHeight)
                 .clip(TrackShape)
                 .background(trackColor)
-                .border(1.dp, borderColor, TrackShape)
+                .border(ForkTokens.Size.controlBorder, borderColor, TrackShape)
                 .onClick(interactionSource) { onCheckedChange(!checked) }
                 .pointerHoverIcon(PointerIcon.Hand),
         ) {
@@ -78,7 +81,7 @@ fun ForkToggle(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .offset(x = thumbOffset)
-                    .size(14.dp)
+                    .size(ForkTokens.Size.toggleKnob)
                     .background(LocalTheme.current.controlThumbColor, LocalTheme.current.circleShape),
             )
         }

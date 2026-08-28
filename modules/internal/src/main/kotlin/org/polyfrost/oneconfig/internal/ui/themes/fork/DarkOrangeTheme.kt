@@ -6,23 +6,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
-import androidx.compose.ui.unit.dp
 import org.polyfrost.oneconfig.internal.ui.themes.Radii as CoreRadii
 import org.polyfrost.oneconfig.internal.ui.themes.UITheme
 import org.polyfrost.oneconfig.internal.ui.themes.UIBranding
 import org.polyfrost.oneconfig.internal.ui.themes.UITypography
-
-/**
- * Token radii specific to the Fork's dark-orange surface.
- *
- * Kept separate from [CoreRadii] so the Fork can tune its own card/control/pill values without
- * changing the upstream radius scale.
- */
-object ForkRadii {
-    val card = 12.dp
-    val control = 6.dp
-    val pill = 8.dp
-}
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 
 /**
  * Dark-orange design-token table and single [UITheme] instance for the Fork's config surface.
@@ -61,12 +49,12 @@ val DarkOrangeTheme = UITheme(
 
     shadowEnabled = true,
 
-    // Shapes — radii per token table
+    // Shapes — radii from ForkTokens, the single source of truth
     backgroundShape = RoundedCornerShape(CoreRadii.LG),
     sideBarNavigationEntryShape = RoundedCornerShape(CoreRadii.SM),
-    modCardShape = RoundedCornerShape(ForkRadii.card),
-    checkBoxShape = RoundedCornerShape(ForkRadii.control),
-    buttonShape = RoundedCornerShape(ForkRadii.pill),
+    modCardShape = ForkTokens.cardShape,
+    checkBoxShape = ForkTokens.controlShape,
+    buttonShape = ForkTokens.pillShape,
     popupShape = RoundedCornerShape(CoreRadii.MD),
     circleShape = CircleShape,
 

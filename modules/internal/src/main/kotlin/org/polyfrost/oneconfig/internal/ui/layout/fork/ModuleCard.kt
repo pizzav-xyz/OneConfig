@@ -23,22 +23,23 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.cardShape
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.cardInsetHighlightColor
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkKeybindBadge
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkKeybindBadge
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkToggle
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
-import org.polyfrost.oneconfig.internal.ui.themes.fork.ForkRadii
+import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
-private val CardShape = RoundedCornerShape(ForkRadii.card)
-private val InsetHighlightColor = androidx.compose.ui.graphics.Color(0x0FFFFFFF) // rgba(255,255,255,0.06)
+
 
 /**
  * Visual row inside a module card body.
@@ -56,7 +57,7 @@ fun ForkSettingRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp),
+            .padding(vertical = ForkTokens.Padding.controlRowVertical),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -83,8 +84,9 @@ fun ForkSettingRow(
 /**
  * A single module card — header (title + keybind + toggle) and a body slot of control rows.
  *
- * All dimensions come from token values: cardPadding (12dp), rowGap (8dp), radius.card (12dp),
- * color.cardBackground, color.border. No hard-coded literals in the component.
+ * All dimensions come from [ForkTokens]: card padding, row gap, radius.card, border width.
+ * The card draws its own 1px inset top-highlight via `drawBehind` to avoid AA stair
+ * where the outer border meets the inner surface.
  */
 @Composable
 fun ModuleCard(
@@ -108,18 +110,17 @@ fun ModuleCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(CardShape)
-            .background(theme.modCardBackground, CardShape)
-            .border(1.dp, borderColor, CardShape)
+            .clip(ForkTokens.cardShape)
+            .background(theme.modCardBackground.withOpacityPercent(92f), ForkTokens.cardShape)
+            .border(ForkTokens.Size.cardBorder, borderColor, ForkTokens.cardShape)
             .alpha(alpha)
             .onClick(interactionSource) {}
             .pointerHoverIcon(PointerIcon.Hand)
             .drawBehind {
-                // inset highlight + subtle shadow for depth
                 drawLine(
-                    color = InsetHighlightColor,
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, 0f),
+                    color = ForkTokens.cardInsetHighlightColor,
+                    start = Offset(ForkTokens.Size.cardBorder.toPx(), ForkTokens.Size.cardBorder.toPx()),
+                    end = Offset(size.width - ForkTokens.Size.cardBorder.toPx(), ForkTokens.Size.cardBorder.toPx()),
                     strokeWidth = 1f,
                 )
             }
@@ -127,9 +128,8 @@ fun ModuleCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(ForkPadding.cardPadding),
+                .padding(ForkTokens.Padding.card),
         ) {
-            // Header: title (left), KeybindBadge (center-right), Toggle (right)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -138,27 +138,26 @@ fun ModuleCard(
                 Text(
                     title,
                     color = theme.textColor,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
                 ForkKeybindBadge(
                     keyName = keybind,
                     onKeyCapture = onKeybindCapture,
-                    modifier = Modifier.weight(1f, fill = false),
+                    modifier = Modifier.width(ForkTokens.Size.keybindMinWidth),
                 )
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(ForkTokens.Padding.toggleLabelGap))
                 ForkToggle(
                     checked = enabled,
                     onCheckedChange = onEnabledChange,
                 )
             }
 
-            // header divider — 1px low-alpha border separates header from body per Figma
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = ForkPadding.rowGap)
-                    .height(1.dp)
+                    .padding(top = ForkTokens.Padding.rowGap)
+                    .height(ForkTokens.Size.cardBorder)
                     .background(theme.borderColor.copy(alpha = 0.08f))
             )
 
@@ -167,10 +166,4 @@ fun ModuleCard(
             }
         }
     }
-}
-
-/** Fork-specific padding tokens. */
-private object ForkPadding {
-    val cardPadding = 12.dp
-    val rowGap = 8.dp
 }

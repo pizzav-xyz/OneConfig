@@ -63,10 +63,9 @@ fun toggleFlag(flags: BooleanArray, index: Int): BooleanArray {
 }
 
 /**
- * Fork-scoped multi-select dropdown, adapted from MultiSelectDropdownOption.
+ * Fork-scoped multi-select dropdown.
  *
- * Restyle selection to a trailing accent dot (drop the leading checkbox),
- * keep checkable/count-label/flag-set logic.
+ * Trigger height, popup max height, item padding, and trailing dot all come from [ForkTokens].
  */
 @Composable
 fun ForkMultiSelectDropdown(
@@ -94,25 +93,27 @@ fun ForkMultiSelectDropdown(
 
     val count = countSelectedFlags(selectedFlags)
     val triggerLabel = formatMultiSelectLabel(count, options.size)
+    val triggerPadding = ForkTokens.Padding.dropdownPadding
+    val dotGap = ForkTokens.Padding.dropdownDotGap
 
     Box(modifier = modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(32.dp)
+                .height(ForkTokens.Size.dropdownTriggerHeight)
                 .onSizeChanged { triggerHeightPx = it.height }
                 .background(backgroundColor, theme.sideBarNavigationEntryShape)
-                .border(1.dp, borderColor, theme.sideBarNavigationEntryShape)
+                .border(ForkTokens.Size.controlBorder, borderColor, theme.sideBarNavigationEntryShape)
                 .onClick(triggerInteraction) { expanded = !expanded }
                 .hoverable(triggerInteraction)
                 .pointerHoverIcon(PointerIcon.Hand)
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = triggerPadding),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 triggerLabel,
-                modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp),
+                modifier = Modifier.weight(1f, fill = false).padding(end = dotGap),
                 color = textColor,
                 fontSize = 13.sp,
                 maxLines = 1,
@@ -135,15 +136,15 @@ fun ForkMultiSelectDropdown(
                             .fillMaxWidth()
                             .clip(theme.sideBarNavigationEntryShape)
                             .background(theme.componentBackground, theme.sideBarNavigationEntryShape)
-                            .border(1.dp, theme.borderColor, theme.sideBarNavigationEntryShape)
+                            .border(ForkTokens.Size.controlBorder, theme.borderColor, theme.sideBarNavigationEntryShape)
                     ) {
                         Column(
                             modifier = Modifier
-                                .heightIn(max = 280.dp)
+                                .heightIn(max = ForkTokens.Size.dropdownPopupMaxHeight)
                                 .verticalScroll(scrollState)
-                                .padding(MenuPadding)
+                                .padding(vertical = ForkTokens.Padding.dropdownItemVertical, horizontal = ForkTokens.Padding.dropdownItemHorizontal)
                                 .fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(ForkTokens.Padding.dropdownItemGap),
                         ) {
                             options.forEachIndexed { index, option ->
                                 ForkMultiselectItem(
@@ -177,11 +178,11 @@ private fun ForkMultiselectItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(theme.sideBarNavigationEntryShape.concentric(MenuPadding))
+            .clip(theme.sideBarNavigationEntryShape.concentric(ForkTokens.Padding.dropdownPadding))
             .onClick(interactionSource, onToggle)
             .hoverable(interactionSource)
             .pointerHoverIcon(PointerIcon.Hand)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = ForkTokens.Padding.dropdownItemHorizontal, vertical = ForkTokens.Padding.dropdownItemVertical),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -193,10 +194,10 @@ private fun ForkMultiselectItem(
             overflow = TextOverflow.Ellipsis,
         )
         if (checked) {
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(ForkTokens.Padding.dropdownDotGap))
             Box(
                 modifier = Modifier
-                    .size(6.dp)
+                    .size(ForkTokens.Size.dropdownDot)
                     .clip(LocalTheme.current.circleShape)
                     .background(Accent),
             )
