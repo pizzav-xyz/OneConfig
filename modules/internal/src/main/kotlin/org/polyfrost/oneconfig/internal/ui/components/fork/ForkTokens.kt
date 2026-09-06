@@ -30,7 +30,7 @@ public object ForkTokens {
 
     // ── Padding ─────────────────────────────────────────────────────────────
     public object Padding {
-        public val card = 10.dp
+        public val card = 12.dp
         public val rowGap = 6.dp
         public val controlRowVertical = 2.dp
         public val dropdownItemHorizontal = 12.dp
@@ -47,8 +47,8 @@ public object ForkTokens {
     // ── Sizing ──────────────────────────────────────────────────────────────
     public object Size {
         // Toggle
-        public val toggleTrackWidth = 36.dp
-        public val toggleTrackHeight = 18.dp
+        public val toggleTrackWidth = 38.dp
+        public val toggleTrackHeight = 20.dp
         public val toggleKnob = 14.dp
         public val toggleInset = 2.dp
 

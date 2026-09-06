@@ -95,6 +95,13 @@ fun ForkConfigSurface(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = org.polyfrost.oneconfig.internal.ui.shell.ShellState.versionLabel?.takeIf { it.isNotBlank() } ?: "Fabric 1.21.1",
+                        color = theme.textColorSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Normal,
+                    )
                 }
                 Row(
                     modifier = Modifier

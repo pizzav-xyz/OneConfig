@@ -148,7 +148,7 @@ fun ModuleCard(
                 Text(
                     title,
                     color = theme.textColor,
-                    fontSize = 13.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
                 ForkKeybindBadge(
@@ -168,7 +168,7 @@ fun ModuleCard(
                     .fillMaxWidth()
                     .padding(top = ForkTokens.Padding.rowGap)
                     .height(ForkTokens.Size.cardBorder)
-                    .background(theme.borderColor.copy(alpha = 0.08f))
+                    .background(theme.borderColor.copy(alpha = 0.12f))
             )
 
             if (enabled) {

@@ -33,7 +33,7 @@ val DarkOrangeTheme = UITheme(
     pageBackground = Color(0x660F0F13),        // ~40% opaque for glass + BlurRenderer backdrop
     sidebarBackground = Color(0x8B151C22),     // semi-transparent rail fill
     chipBackground = Color(0x8B232D32),        // semi-transparent chip / tag surface
-    modCardBackground = Color(0x96232D32),     // semi-transparent card interior
+    modCardBackground = Color(0xB0232D32),     // lighter glass card interior
     componentBackground = Color(0xCC1A2229),   // control-row surface
     popupBackground = Color(0xCC1A2229),       // dropdown / popup surface
 
