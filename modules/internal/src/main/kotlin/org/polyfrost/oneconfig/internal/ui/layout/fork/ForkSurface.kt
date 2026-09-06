@@ -152,6 +152,7 @@ fun ForkConfigSurface(
                     println("${module.id} enabled=$enabled")
                 },
                 searchQuery = searchQuery,
+                selectedCategory = selectedCategory,
             )
         }
     }

@@ -39,14 +39,18 @@ fun ModuleGrid(
     onKeybindCapture: (MockModule, String) -> Unit,
     onModuleToggle: (MockModule, Boolean) -> Unit,
     searchQuery: String = "",
+    selectedCategory: String = "combat",
     modifier: Modifier = Modifier,
 ) {
     val theme = LocalTheme.current
     val gap = ForkTokens.Spacing.cardGap
     val normalizedQuery = searchQuery.trim().lowercase()
-    val visibleModules = remember(modules, normalizedQuery) {
-        if (normalizedQuery.isBlank()) modules
-        else modules.filter { it.title.lowercase().contains(normalizedQuery) }
+    val visibleModules = remember(modules, normalizedQuery, selectedCategory) {
+        modules.filter { m ->
+            val categoryMatch = m.category == selectedCategory
+            val searchMatch = normalizedQuery.isBlank() || m.title.lowercase().contains(normalizedQuery)
+            categoryMatch && searchMatch
+        }
     }
 
     Column(
