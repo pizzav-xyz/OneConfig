@@ -141,7 +141,28 @@ fun ForkConfigSurface(
                 }
             }
 
-            Spacer(modifier = Modifier.height(ForkTokens.Spacing.cardGap))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "${MockModules.modules.count { it.category == selectedCategory && (searchQuery.isBlank() || it.title.lowercase().contains(searchQuery.lowercase())) }} in ${selectedCategory.replaceFirstChar { c -> c.uppercase() }}",
+                    color = theme.textColorSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Normal,
+                )
+                if (searchQuery.isNotBlank()) {
+                    Text(
+                        text = "for \"${searchQuery}\"",
+                        color = theme.accentColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             ModuleGrid(
                 modules = MockModules.modules,
