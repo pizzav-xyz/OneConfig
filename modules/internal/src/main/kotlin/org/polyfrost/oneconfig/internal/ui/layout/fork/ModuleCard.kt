@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.onClick
@@ -34,7 +35,6 @@ import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.cardShape
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.cardInsetHighlightColor
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkKeybindBadge
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
-import org.polyfrost.oneconfig.internal.ui.components.fork.ForkKeybindBadge
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkToggle
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
@@ -125,6 +125,14 @@ fun ModuleCard(
                 )
             }
     ) {
+        if (enabled) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(theme.accentColor)
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
