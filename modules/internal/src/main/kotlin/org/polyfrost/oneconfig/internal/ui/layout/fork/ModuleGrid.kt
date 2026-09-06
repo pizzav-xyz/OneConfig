@@ -84,6 +84,7 @@ fun ModuleGrid(
                     Box(modifier = Modifier.weight(1f)) {
                         ModuleCard(
                             title = item.title,
+                            category = item.category,
                             keybind = item.keybind,
                             onKeybindCapture = { onKeybindCapture(item, it) },
                             enabled = item.enabled,

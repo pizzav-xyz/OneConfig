@@ -92,6 +92,7 @@ fun ForkSettingRow(
 @Composable
 fun ModuleCard(
     title: String,
+    category: String? = null,
     keybind: String?,
     onKeybindCapture: (String) -> Unit,
     enabled: Boolean,
@@ -145,12 +146,30 @@ fun ModuleCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    title,
-                    color = theme.textColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        title,
+                        color = theme.textColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    if (category != null) {
+                        Spacer(Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(ForkTokens.pillShape)
+                                .background(theme.chipBackground)
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                        ) {
+                            Text(
+                                text = category.uppercase(),
+                                color = theme.textColorSecondary,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                }
                 ForkKeybindBadge(
                     keyName = keybind,
                     onKeyCapture = onKeybindCapture,
