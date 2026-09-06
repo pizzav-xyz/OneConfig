@@ -56,14 +56,14 @@ public object ForkTokens {
         public val checkbox = 16.dp
 
         // Slider
-        public val sliderThumb = 19.dp
-        public val sliderTrack = 4.dp
-        public val sliderThumbRing = 2.dp
+        public val sliderThumb = 14.dp
+        public val sliderTrack = 6.dp
+        public val sliderThumbRing = 1.5.dp
 
         // Dropdown / MultiSelect
         public val dropdownTriggerHeight = 32.dp
         public val dropdownDot = 6.dp
-        public val dropdownPopupMaxHeight = 280.dp
+        public val dropdownPopupMaxHeight = 320.dp
 
         // KeybindBadge
         public val keybindMinWidth = 60.dp

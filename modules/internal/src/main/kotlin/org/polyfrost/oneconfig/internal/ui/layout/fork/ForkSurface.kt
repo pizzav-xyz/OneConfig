@@ -37,7 +37,7 @@ import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 fun ForkConfigSurface(
     onBack: (() -> Unit)? = null,
 ) {
-    var selectedCategory by remember { mutableStateOf("Combat") }
+    var selectedCategory by remember { mutableStateOf("combat") }
     var searchQuery by remember { mutableStateOf("") }
 
     val categories = remember {

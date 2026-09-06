@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -110,6 +111,7 @@ fun ModuleCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(8.dp, ForkTokens.cardShape, clip = false)
             .clip(ForkTokens.cardShape)
             .background(theme.modCardBackground.withOpacityPercent(92f), ForkTokens.cardShape)
             .border(ForkTokens.Size.cardBorder, borderColor, ForkTokens.cardShape)
