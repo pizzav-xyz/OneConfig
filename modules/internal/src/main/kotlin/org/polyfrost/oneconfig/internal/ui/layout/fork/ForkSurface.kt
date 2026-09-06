@@ -79,53 +79,59 @@ fun ForkConfigSurface(
                     .background(theme.modCardBackground.withOpacityPercent(92f), headerShape)
                     .padding(ForkTokens.Padding.card),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = "OneConfig",
-                    color = theme.textColor,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Spacer(modifier = Modifier.weight(1f))
-            }
-
-            Spacer(modifier = Modifier.height(ForkTokens.Spacing.controlRowGap))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(ForkTokens.controlShape)
-                    .background(theme.componentBackground.withOpacityPercent(85f), ForkTokens.controlShape)
-                    .padding(horizontal = ForkTokens.Padding.dropdownPadding, vertical = ForkTokens.Spacing.controlRowGap),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon("settings-search", color = theme.textColorSecondary, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(ForkTokens.Padding.dropdownDotGap))
-                BasicTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    singleLine = true,
-                    textStyle = TextStyle(
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "OneConfig",
                         color = theme.textColor,
-                        fontSize = 13.sp,
-                        fontFamily = theme.typography.family,
-                    ),
-                    cursorBrush = SolidColor(theme.textColor),
-                    modifier = Modifier.weight(1f),
-                    decorationBox = { innerTextField ->
-                        if (searchQuery.isBlank()) {
-                            Text(
-                                text = "Search settings…",
-                                color = theme.textColorSecondary,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Normal,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                        innerTextField()
-                    },
-                )
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Dark Orange",
+                        color = theme.accentColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .width(220.dp)
+                        .clip(ForkTokens.controlShape)
+                        .background(theme.componentBackground.withOpacityPercent(85f), ForkTokens.controlShape)
+                        .padding(horizontal = ForkTokens.Padding.dropdownPadding, vertical = ForkTokens.Spacing.controlRowGap),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon("settings-search", color = theme.textColorSecondary, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(ForkTokens.Padding.dropdownDotGap))
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            color = theme.textColor,
+                            fontSize = 13.sp,
+                            fontFamily = theme.typography.family,
+                        ),
+                        cursorBrush = SolidColor(theme.textColor),
+                        modifier = Modifier.weight(1f),
+                        decorationBox = { innerTextField ->
+                            if (searchQuery.isBlank()) {
+                                Text(
+                                    text = "Search…",
+                                    color = theme.textColorSecondary,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            innerTextField()
+                        },
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(ForkTokens.Spacing.cardGap))

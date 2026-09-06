@@ -22,16 +22,16 @@ public object ForkTokens {
 
     // ── Spacing ─────────────────────────────────────────────────────────────
     public object Spacing {
-        public val cardGap = 16.dp
+        public val cardGap = 12.dp
         public val railPad = 8.dp
         public val railGap = 28.dp
-        public val controlRowGap = 6.dp
+        public val controlRowGap = 4.dp
     }
 
     // ── Padding ─────────────────────────────────────────────────────────────
     public object Padding {
-        public val card = 12.dp
-        public val rowGap = 8.dp
+        public val card = 10.dp
+        public val rowGap = 6.dp
         public val controlRowVertical = 2.dp
         public val dropdownItemHorizontal = 12.dp
         public val dropdownItemVertical = 8.dp
