@@ -160,8 +160,8 @@ fun ModuleCard(
                     Text(
                         title,
                         color = theme.textColor,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
                     )
                     if (category != null) {
                         Spacer(Modifier.width(8.dp))
