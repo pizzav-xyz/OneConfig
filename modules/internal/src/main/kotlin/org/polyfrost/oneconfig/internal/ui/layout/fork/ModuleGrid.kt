@@ -64,7 +64,8 @@ fun ModuleGrid(
     ) {
         if (visibleModules.isEmpty()) {
             Text(
-                text = "No modules match \"$searchQuery\"",
+                text = if (normalizedQuery.isBlank()) "No modules in ${selectedCategory.replaceFirstChar { it.uppercase() }}"
+                else "No results for \"$searchQuery\" in ${selectedCategory.replaceFirstChar { it.uppercase() }}",
                 color = theme.textColorSecondary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
