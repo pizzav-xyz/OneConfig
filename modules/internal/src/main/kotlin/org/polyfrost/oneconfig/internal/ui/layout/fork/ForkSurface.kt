@@ -1,6 +1,7 @@
 package org.polyfrost.oneconfig.internal.ui.layout.fork
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
+import org.polyfrost.oneconfig.internal.ui.components.onClick
+import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
@@ -112,7 +115,7 @@ fun ForkConfigSurface(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon("settings-search", color = theme.textColorSecondary, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(ForkTokens.Padding.dropdownDotGap))
+                    Spacer(modifier = Modifier.width(8.dp))
                     BasicTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
@@ -138,6 +141,16 @@ fun ForkConfigSurface(
                             innerTextField()
                         },
                     )
+                    if (searchQuery.isNotBlank()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            "x",
+                            color = theme.textColorSecondary,
+                            modifier = Modifier
+                                .size(14.dp)
+                                .clickable { searchQuery = "" },
+                        )
+                    }
                 }
             }
 
