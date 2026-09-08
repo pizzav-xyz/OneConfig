@@ -39,7 +39,7 @@ fun ModuleGrid(
     onKeybindCapture: (MockModule, String) -> Unit,
     onModuleToggle: (MockModule, Boolean) -> Unit,
     searchQuery: String = "",
-    selectedCategory: String = "combat",
+    selectedCategory: String = "all",
     modifier: Modifier = Modifier,
 ) {
     val theme = LocalTheme.current
@@ -47,7 +47,7 @@ fun ModuleGrid(
     val normalizedQuery = searchQuery.trim().lowercase()
     val visibleModules = remember(modules, normalizedQuery, selectedCategory) {
         modules.filter { m ->
-            val categoryMatch = m.category == selectedCategory
+            val categoryMatch = selectedCategory == "all" || m.category == selectedCategory
             val searchMatch = normalizedQuery.isBlank() || m.title.lowercase().contains(normalizedQuery)
             categoryMatch && searchMatch
         }

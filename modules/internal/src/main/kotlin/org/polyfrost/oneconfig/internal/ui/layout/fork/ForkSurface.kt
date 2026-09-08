@@ -40,17 +40,18 @@ import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 fun ForkConfigSurface(
     onBack: (() -> Unit)? = null,
 ) {
-    var selectedCategory by remember { mutableStateOf("combat") }
+    var selectedCategory by remember { mutableStateOf("all") }
     var searchQuery by remember { mutableStateOf("") }
 
     val categories = remember {
         listOf(
-            SidebarEntry("combat", "settings"),
+            SidebarEntry("all", "dots-grid"),
+            SidebarEntry("combat", "combat"),
             SidebarEntry("player", "profiles"),
-            SidebarEntry("movement", "activity"),
-            SidebarEntry("render", "eye"),
-            SidebarEntry("world", "box"),
-            SidebarEntry("misc", "help-circle"),
+            SidebarEntry("movement", "move"),
+            SidebarEntry("render", "paintbrush"),
+            SidebarEntry("world", "layers"),
+            SidebarEntry("misc", "qol"),
         )
     }
 
@@ -114,7 +115,7 @@ fun ForkConfigSurface(
                         .padding(horizontal = ForkTokens.Padding.dropdownPadding, vertical = ForkTokens.Spacing.controlRowGap),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon("settings-search", color = theme.textColorSecondary, modifier = Modifier.size(16.dp))
+                    Icon("search", color = theme.textColorSecondary, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     BasicTextField(
                         value = searchQuery,
@@ -144,7 +145,7 @@ fun ForkConfigSurface(
                     if (searchQuery.isNotBlank()) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
-                            "x",
+                            "close",
                             color = theme.textColorSecondary,
                             modifier = Modifier
                                 .size(14.dp)
@@ -160,7 +161,13 @@ fun ForkConfigSurface(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "${MockModules.modules.count { it.category == selectedCategory && (searchQuery.isBlank() || it.title.lowercase().contains(searchQuery.lowercase())) }} in ${selectedCategory.replaceFirstChar { c -> c.uppercase() }}",
+                    text = run {
+                        val count = MockModules.modules.count {
+                            (selectedCategory == "all" || it.category == selectedCategory) &&
+                                (searchQuery.isBlank() || it.title.lowercase().contains(searchQuery.lowercase()))
+                        }
+                        if (selectedCategory == "all") "$count modules" else "$count in ${selectedCategory.replaceFirstChar { c -> c.uppercase() }}"
+                    },
                     color = theme.textColorSecondary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Normal,

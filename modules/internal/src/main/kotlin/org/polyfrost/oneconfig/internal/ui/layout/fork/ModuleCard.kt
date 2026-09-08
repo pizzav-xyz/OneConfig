@@ -147,12 +147,13 @@ fun ModuleCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val catIcon = when (category) {
-                        "combat" -> "settings"
+                        "combat" -> "combat"
                         "player" -> "profiles"
-                        "movement" -> "activity"
-                        "render" -> "eye"
-                        "world" -> "box"
-                        else -> "help-circle"
+                        "movement" -> "move"
+                        "render" -> "paintbrush"
+                        "world" -> "layers"
+                        "misc" -> "qol"
+                        else -> "settings"
                     }
                     org.polyfrost.oneconfig.internal.ui.components.Icon(catIcon, color = theme.accentColor, modifier = Modifier.width(14.dp).height(14.dp))
                     Spacer(Modifier.width(6.dp))
