@@ -25,10 +25,7 @@ import androidx.compose.ui.unit.dp
 import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
-import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.railBorder
-import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.railIconTint
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
-import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
@@ -63,7 +60,7 @@ fun IconSidebar(
             .drawBehind {
                 // 1px right-edge border drawn at the inner inset so AA does not create a halo outside the rail.
                 drawLine(
-                    color = ForkTokens.railBorder,
+                    color = theme.borderColor,
                     start = Offset(size.width - 0.5f, 0f),
                     end = Offset(size.width - 0.5f, size.height),
                     strokeWidth = 1f,
@@ -79,7 +76,7 @@ fun IconSidebar(
 
             val bgColor by animateColorAsState(
                 when {
-                    isSelected -> Accent
+                    isSelected -> theme.accentColor
                     isHovered -> theme.textColor.copy(alpha = 0.1f)
                     else -> Color.Transparent
                 }
@@ -88,7 +85,7 @@ fun IconSidebar(
                 when {
                     isSelected -> theme.accentTextColor
                     isHovered -> theme.textColor
-                    else -> ForkTokens.railIconTint
+                    else -> theme.textColorSecondary
                 }
             )
 

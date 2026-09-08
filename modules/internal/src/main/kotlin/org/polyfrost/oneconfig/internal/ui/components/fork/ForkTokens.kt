@@ -1,7 +1,6 @@
 package org.polyfrost.oneconfig.internal.ui.components.fork
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
@@ -82,8 +81,4 @@ public object ForkTokens {
     public val cardShape = RoundedCornerShape(Radii.card)
     public val controlShape = RoundedCornerShape(Radii.control)
     public val pillShape = RoundedCornerShape(Radii.pill)
-
-    public val cardInsetHighlightColor = Color(0x0FFFFFFF)
-    public val railBorder = Color(0xFF252A33)
-    public val railIconTint = Color(0xFFA3AAC0)
 }

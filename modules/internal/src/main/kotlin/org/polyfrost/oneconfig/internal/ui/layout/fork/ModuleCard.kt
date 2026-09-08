@@ -33,7 +33,6 @@ import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.cardShape
-import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens.cardInsetHighlightColor
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkKeybindBadge
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkToggle
@@ -121,7 +120,7 @@ fun ModuleCard(
             .pointerHoverIcon(PointerIcon.Hand)
             .drawBehind {
                 drawLine(
-                    color = ForkTokens.cardInsetHighlightColor,
+                    color = theme.accentTextColor.copy(alpha = 0.06f),
                     start = Offset(ForkTokens.Size.cardBorder.toPx(), ForkTokens.Size.cardBorder.toPx()),
                     end = Offset(size.width - ForkTokens.Size.cardBorder.toPx(), ForkTokens.Size.cardBorder.toPx()),
                     strokeWidth = 1f,
