@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -126,20 +126,6 @@ fun ModuleCard(
                 )
             }
     ) {
-        if (enabled) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(
-                        theme.accentColor,
-                        RoundedCornerShape(
-                            topStart = ForkTokens.Radii.card,
-                            topEnd = ForkTokens.Radii.card,
-                        ),
-                    )
-            )
-        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,7 +146,11 @@ fun ModuleCard(
                         "misc" -> "qol"
                         else -> "settings"
                     }
-                    org.polyfrost.oneconfig.internal.ui.components.Icon(catIcon, color = theme.accentColor, modifier = Modifier.width(14.dp).height(14.dp))
+                    org.polyfrost.oneconfig.internal.ui.components.Icon(
+                        catIcon,
+                        color = theme.accentColor,
+                        modifier = Modifier.width(14.dp).height(14.dp).offset(y = 1.dp),
+                    )
                     Spacer(Modifier.width(6.dp))
                     Text(
                         title,
@@ -168,27 +158,6 @@ fun ModuleCard(
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                     )
-                    if (category != null) {
-                        Spacer(Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(ForkTokens.pillShape)
-                                .background(theme.chipBackground)
-                                .border(
-                                    ForkTokens.Size.controlBorder,
-                                    theme.borderColor,
-                                    ForkTokens.pillShape,
-                                )
-                                .padding(horizontal = 6.dp, vertical = 2.dp),
-                        ) {
-                            Text(
-                                text = category.uppercase(),
-                                color = theme.textColorSecondary,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
-                    }
                 }
                 ForkKeybindBadge(
                     keyName = keybind,

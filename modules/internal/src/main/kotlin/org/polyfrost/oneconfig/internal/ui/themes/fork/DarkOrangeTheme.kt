@@ -15,12 +15,10 @@ import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 /**
  * Dark-orange design-token table and single [UITheme] instance for the Fork's config surface.
  *
- * Accent decision (F5 P0): orange #FF7A45 is canonical for this fork.
- * Rationale: (1) fork is named "Dark Orange" — orange IS the identity;
- * (2) Figma spec uses peach/orange family (#FF8A65/#FF7A50);
- * (3) controlTrackColor 0xFF5C3A2A is already warm/orange — accent must match;
- * (4) the base OneConfig blue #2D5AFF was leaking through ThemeConfig defaults, not fork-intentional.
- * Figma reference should be updated to match #FF7A45 as single source of truth.
+ * Accent decision (F5 P0, re-tinted to reference): salmon #FF9676 is canonical.
+ * Rationale: hex-sampled from Figma spec (dominant accent cluster #FF9676 with
+ * AA ramps #E4876C → #B06A5A). Fills are warm plum/cocoa (#2B1F2A card,
+ * #241C1C rail) — the reference reads "warm cocoa", never cold slate.
  *
  * The glass-vs-opaque decision is a single token swap via [Color.copy(alpha = ...)] on [pageBackground]
  * plus optional BlurRenderer backdrop usage — see task 2.1.4 / 2.3.1.
@@ -30,17 +28,17 @@ val DarkOrangeTheme = UITheme(
     name = "Dark Orange Fork",
 
     // Page / surface backgrounds — alpha controls glass-vs-opaque intent
-    pageBackground = Color(0x660F0F13),        // ~40% opaque for glass + BlurRenderer backdrop
-    sidebarBackground = Color(0x8B151C22),     // semi-transparent rail fill
-    chipBackground = Color(0x8B232D32),        // semi-transparent chip / tag surface
-    modCardBackground = Color(0xB0232D32),     // lighter glass card interior
-    componentBackground = Color(0xCC1A2229),   // control-row surface
-    popupBackground = Color(0xCC1A2229),       // dropdown / popup surface
+    pageBackground = Color(0x66141013),        // ~40% opaque for glass + BlurRenderer backdrop
+    sidebarBackground = Color(0x8B241C1C),     // semi-transparent cocoa rail fill
+    chipBackground = Color(0x8B2E2129),        // semi-transparent warm chip / tag surface
+    modCardBackground = Color(0xB02B1F2A),     // warm plum glass card interior (sampled reference)
+    componentBackground = Color(0xCC251C22),   // warm control-row surface
+    popupBackground = Color(0xCC251C22),       // warm dropdown / popup surface
 
     // Borders & text
     borderColor = Color(0x1AFFFFFF),           // 1px low-alpha border
-    textColor = Color(0xFFD5DBFF),             // primary text
-    textColorSecondary = Color(0xFF757883),    // secondary / placeholder text
+    textColor = Color(0xFFFFF3EC),             // warm primary text
+    textColorSecondary = Color(0xFF9A8B84),    // warm secondary / placeholder text
     accentTextColor = Color(0xFFFFFFFF),       // accent text (white on dark)
 
     // Shadow & controls
@@ -71,5 +69,5 @@ val DarkOrangeTheme = UITheme(
             Font("assets/oneconfig/fonts/Poppins/Poppins-Thin.ttf", FontWeight.Thin)
         )
     )
-).withAccentColor(Color(0xFFFF7A45))       // Figma peach 500 — canonical accent for dark-orange fork
-  .withControlTrackColor(Color(0xFF5C3A2A)) // matching warm-orange unfilled track
+).withAccentColor(Color(0xFFFF9676))       // Figma salmon — sampled reference dominant cluster
+  .withControlTrackColor(Color(0xFF5E3B32)) // dusty mauve-brown unfilled track matching salmon ramps

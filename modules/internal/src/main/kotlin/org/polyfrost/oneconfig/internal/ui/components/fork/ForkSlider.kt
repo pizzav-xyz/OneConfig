@@ -1,9 +1,12 @@
 package org.polyfrost.oneconfig.internal.ui.components.fork
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,12 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import org.polyfrost.oneconfig.internal.ui.themes.Accent
+import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import kotlin.math.roundToInt
 
@@ -53,10 +58,16 @@ fun ForkSlider(
         ((value - min) / (max - min)).coerceIn(0f, 1f),
         animationSpec = androidx.compose.animation.core.spring(),
     )
+    val interactionSource = rememberInteractionSource()
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val fillColor by animateColorAsState(
+        if (isHovered) lerp(theme.accentColor, Color.White, 0.15f) else theme.accentColor
+    )
 
     Box(
         modifier = modifier
             .height(thumbSize)
+            .hoverable(interactionSource)
             .onSizeChanged { trackWidthPx = it.width.toFloat() }
             .pointerInput(min, max, step) {
                 val thumbPx = thumbSize.toPx()
@@ -89,7 +100,7 @@ fun ForkSlider(
                 .height(trackHeight)
                 .align(Alignment.CenterStart)
                 .clip(theme.checkBoxShape)
-                .background(Accent)
+                .background(fillColor)
         )
         Box(
             Modifier

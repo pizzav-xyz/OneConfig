@@ -38,19 +38,13 @@ fun ModuleGrid(
     modules: List<MockModule>,
     onKeybindCapture: (MockModule, String) -> Unit,
     onModuleToggle: (MockModule, Boolean) -> Unit,
-    searchQuery: String = "",
-    selectedCategory: String = "all",
+    selectedCategory: String = "combat",
     modifier: Modifier = Modifier,
 ) {
     val theme = LocalTheme.current
     val gap = ForkTokens.Spacing.cardGap
-    val normalizedQuery = searchQuery.trim().lowercase()
-    val visibleModules = remember(modules, normalizedQuery, selectedCategory) {
-        modules.filter { m ->
-            val categoryMatch = selectedCategory == "all" || m.category == selectedCategory
-            val searchMatch = normalizedQuery.isBlank() || m.title.lowercase().contains(normalizedQuery)
-            categoryMatch && searchMatch
-        }
+    val visibleModules = remember(modules, selectedCategory) {
+        modules.filter { m -> m.category == selectedCategory }
     }
 
     Column(
@@ -64,8 +58,7 @@ fun ModuleGrid(
     ) {
         if (visibleModules.isEmpty()) {
             Text(
-                text = if (normalizedQuery.isBlank()) "No modules in ${selectedCategory.replaceFirstChar { it.uppercase() }}"
-                else "No results for \"$searchQuery\" in ${selectedCategory.replaceFirstChar { it.uppercase() }}",
+                text = "No modules in ${selectedCategory.replaceFirstChar { it.uppercase() }}",
                 color = theme.textColorSecondary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
