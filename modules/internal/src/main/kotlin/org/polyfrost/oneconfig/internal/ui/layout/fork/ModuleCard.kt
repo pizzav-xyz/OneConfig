@@ -1,7 +1,6 @@
 package org.polyfrost.oneconfig.internal.ui.layout.fork
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -19,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
@@ -106,7 +104,9 @@ fun ModuleCard(
     val borderColor by animateColorAsState(
         if (isHovered) theme.borderColor else theme.borderColor.copy(alpha = 0.5f)
     )
-    val alpha by animateFloatAsState(if (!enabled) 0.5f else 1f)
+    val titleColor by animateColorAsState(
+        if (enabled) theme.textColor else theme.textColor.copy(alpha = 0.8f)
+    )
 
     Column(
         modifier = modifier
@@ -115,7 +115,6 @@ fun ModuleCard(
             .clip(ForkTokens.cardShape)
             .background(theme.modCardBackground.withOpacityPercent(92f), ForkTokens.cardShape)
             .border(ForkTokens.Size.cardBorder, borderColor, ForkTokens.cardShape)
-            .alpha(alpha)
             .onClick(interactionSource) {}
             .pointerHoverIcon(PointerIcon.Hand)
             .drawBehind {
@@ -132,7 +131,13 @@ fun ModuleCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(2.dp)
-                    .background(theme.accentColor)
+                    .background(
+                        theme.accentColor,
+                        RoundedCornerShape(
+                            topStart = ForkTokens.Radii.card,
+                            topEnd = ForkTokens.Radii.card,
+                        ),
+                    )
             )
         }
         Column(
@@ -159,7 +164,7 @@ fun ModuleCard(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         title,
-                        color = theme.textColor,
+                        color = titleColor,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                     )
@@ -169,6 +174,11 @@ fun ModuleCard(
                             modifier = Modifier
                                 .clip(ForkTokens.pillShape)
                                 .background(theme.chipBackground)
+                                .border(
+                                    ForkTokens.Size.controlBorder,
+                                    theme.borderColor,
+                                    ForkTokens.pillShape,
+                                )
                                 .padding(horizontal = 6.dp, vertical = 2.dp),
                         ) {
                             Text(

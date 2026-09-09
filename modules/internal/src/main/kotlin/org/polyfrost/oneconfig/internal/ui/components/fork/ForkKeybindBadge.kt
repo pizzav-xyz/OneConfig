@@ -35,7 +35,6 @@ import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
-import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 
@@ -60,20 +59,20 @@ fun ForkKeybindBadge(
 
     val bgColor by animateColorAsState(
         when {
-            recording -> Accent.copy(alpha = 0.2f)
+            recording -> theme.accentColor.copy(alpha = 0.2f)
             isHovered -> theme.componentBackground.copy(alpha = 0.8f)
             else -> theme.componentBackground
         }
     )
     val borderColor by animateColorAsState(
         when {
-            recording -> Accent
+            recording -> theme.accentColor
             isHovered -> theme.textColor.copy(alpha = 0.2f)
-            else -> theme.borderColor
+            else -> theme.textColor.copy(alpha = 0.2f)
         }
     )
     val textColor by animateColorAsState(
-        if (recording) Accent else theme.textColor
+        if (recording) theme.accentColor else theme.textColor
     )
 
     LaunchedEffect(recording) {
