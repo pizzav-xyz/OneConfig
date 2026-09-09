@@ -15,14 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
@@ -41,6 +40,7 @@ fun ForkCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    testKey: String? = null,
 ) {
     val theme = LocalTheme.current
     val interactionSource = rememberInteractionSource()
@@ -58,6 +58,7 @@ fun ForkCheckbox(
     Box(
         modifier = modifier
             .size(ForkTokens.Size.checkbox)
+            .testBounds(testKey)
             .clip(ForkTokens.controlShape)
             .background(bgColor, ForkTokens.controlShape)
             .border(ForkTokens.Size.controlBorder, borderColor, ForkTokens.controlShape)
@@ -66,18 +67,28 @@ fun ForkCheckbox(
         contentAlignment = Alignment.Center,
     ) {
         AnimatedVisibility(checked, enter = fadeIn(), exit = fadeOut()) {
-            Box(
-                modifier = Modifier
-                    .size(ForkTokens.Padding.checkboxDot)
-                    .clip(LocalTheme.current.circleShape)
-                    .background(Accent),
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .size(ForkTokens.Padding.checkboxDot)
+                        .clip(LocalTheme.current.circleShape)
+                        .background(Accent.copy(alpha = 0.35f))
+                        .blur(7.dp),
+                )
+                Box(
+                    modifier = Modifier
+                        .size(ForkTokens.Padding.checkboxDot - ForkTokens.Size.controlBorder * 2)
+                        .clip(LocalTheme.current.circleShape)
+                        .background(Accent),
+                )
+            }
         }
     }
 }
 
 /**
- * Wrapper: checkbox with an On/Off label, mirroring CheckboxControl.
+ * Wrapper: checkbox with an optional label. No On/Off fallback — when the
+ * label is null the row renders the checkbox alone.
  */
 @Composable
 fun ForkCheckboxControl(
@@ -91,12 +102,14 @@ fun ForkCheckboxControl(
         horizontalArrangement = Arrangement.spacedBy(ForkTokens.Padding.toggleLabelGap),
         modifier = modifier,
     ) {
-        Text(
-            label ?: if (checked) "On" else "Off",
-            color = LocalTheme.current.textColorSecondary,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-        )
+        if (label != null) {
+            Text(
+                label,
+                color = LocalTheme.current.textColorSecondary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
         ForkCheckbox(checked, onCheckedChange)
     }
 }

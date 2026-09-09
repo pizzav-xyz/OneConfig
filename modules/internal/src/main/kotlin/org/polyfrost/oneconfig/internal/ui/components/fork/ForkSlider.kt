@@ -7,7 +7,10 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -26,9 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import kotlin.math.roundToInt
@@ -51,6 +57,7 @@ fun ForkSlider(
     modifier: Modifier = Modifier,
     thumbSize: Dp = ForkTokens.Size.sliderThumb,
     trackHeight: Dp = ForkTokens.Size.sliderTrack,
+    testKey: String? = null,
 ) {
     val theme = LocalTheme.current
     var trackWidthPx by remember { mutableStateOf(0f) }
@@ -67,6 +74,7 @@ fun ForkSlider(
     Box(
         modifier = modifier
             .height(thumbSize)
+            .testBounds(testKey)
             .hoverable(interactionSource)
             .onSizeChanged { trackWidthPx = it.width.toFloat() }
             .pointerInput(min, max, step) {
@@ -130,4 +138,55 @@ fun snap(min: Float, max: Float, step: Float, x: Float, trackWidthPx: Float, thu
     val clamped = raw.coerceIn(min, max)
     if (step <= 0f) return clamped
     return (min + ((clamped - min) / step).roundToInt() * step).coerceIn(min, max)
+}
+
+/**
+ * Compact slider row (reference §5): label left with the value right-aligned on
+ * the same row, full-width track beneath.
+ */
+@Composable
+fun ForkSliderRow(
+    label: String,
+    valueText: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    min: Float,
+    max: Float,
+    step: Float,
+    modifier: Modifier = Modifier,
+    testKey: String? = null,
+) {
+    val theme = LocalTheme.current
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(ForkTokens.Padding.controlRowVertical),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                label,
+                color = theme.textColor,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+            )
+            Text(
+                valueText,
+                color = theme.textColorSecondary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Normal,
+            )
+        }
+        ForkSlider(
+            value = value,
+            onValueChange = onValueChange,
+            min = min,
+            max = max,
+            step = step,
+            modifier = Modifier.fillMaxWidth(),
+            testKey = testKey,
+        )
+    }
 }

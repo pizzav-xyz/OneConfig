@@ -1,13 +1,10 @@
 package org.polyfrost.oneconfig.internal.ui.layout.fork
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,22 +18,19 @@ import androidx.compose.ui.unit.sp
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
-import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
 /**
- * 2-column responsive grid host for [ModuleCard] components.
+ * 2-column dense grid host for [ModuleCard] components.
  *
- * Gutters on both axes use [ForkTokens.Spacing.cardGap] (16dp). The grid is vertically
- * scrollable when the total content height exceeds the viewport. Odd card
- * counts are left-aligned with no placeholder in the second column.
- *
- * Single shadow token is handled by [ModuleCard]; the grid itself owns
- * no shadow brush — it only owns spacing.
+ * Gutters on both axes use [ForkTokens.Spacing.cardGap]. The grid is vertically
+ * scrollable and does not draw its own background fill. Odd card counts are
+ * left-aligned with no placeholder in the second column.
  */
 @Composable
 fun ModuleGrid(
     modules: List<MockModule>,
     onKeybindCapture: (MockModule, String) -> Unit,
+    onKeybindCancel: (MockModule) -> Unit = {},
     onModuleToggle: (MockModule, Boolean) -> Unit,
     selectedCategory: String = "combat",
     modifier: Modifier = Modifier,
@@ -50,8 +44,6 @@ fun ModuleGrid(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight()
-            .background(theme.pageBackground.withOpacityPercent(90f))
             .verticalScroll(rememberScrollState())
             .padding(gap),
         verticalArrangement = Arrangement.spacedBy(gap),
@@ -74,16 +66,33 @@ fun ModuleGrid(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(gap),
             ) {
-                rowModules.forEach { item ->
+                val first = rowModules.first()
+                Box(modifier = Modifier.weight(1f)) {
+                    ModuleCard(
+                        title = first.title,
+                        category = first.category,
+                        keybind = first.keybind,
+                        onKeybindCapture = { onKeybindCapture(first, it) },
+                        onKeybindCancel = { onKeybindCancel(first) },
+                        enabled = first.enabled,
+                        onEnabledChange = { onModuleToggle(first, it) },
+                        testKey = first.id,
+                        body = first.bodyComposable,
+                    )
+                }
+                if (rowModules.size > 1) {
+                    val second = rowModules[1]
                     Box(modifier = Modifier.weight(1f)) {
                         ModuleCard(
-                            title = item.title,
-                            category = item.category,
-                            keybind = item.keybind,
-                            onKeybindCapture = { onKeybindCapture(item, it) },
-                            enabled = item.enabled,
-                            onEnabledChange = { onModuleToggle(item, it) },
-                            body = item.bodyComposable,
+                            title = second.title,
+                            category = second.category,
+                            keybind = second.keybind,
+                            onKeybindCapture = { onKeybindCapture(second, it) },
+                            onKeybindCancel = { onKeybindCancel(second) },
+                            enabled = second.enabled,
+                            onEnabledChange = { onModuleToggle(second, it) },
+                            testKey = second.id,
+                            body = second.bodyComposable,
                         )
                     }
                 }

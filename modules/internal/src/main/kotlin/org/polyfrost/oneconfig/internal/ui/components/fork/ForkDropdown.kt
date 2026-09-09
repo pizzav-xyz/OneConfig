@@ -67,6 +67,7 @@ fun ForkDropdown(
     onSelected: (Int) -> Unit,
     triggerWidth: Float? = null,
     modifier: Modifier = Modifier,
+    testKey: String? = null,
 ) {
     val theme = LocalTheme.current
     var expanded by remember { mutableStateOf(false) }
@@ -80,15 +81,15 @@ fun ForkDropdown(
         if (isHovered || expanded) theme.textColor else theme.textColorSecondary
     )
     val backgroundColor by animateColorAsState(
-        if (expanded) Accent.copy(0.2f).compositeOver(theme.componentBackground)
-        else theme.componentBackground
+        if (expanded) Accent.copy(0.2f).compositeOver(theme.modCardBackground)
+        else theme.modCardBackground
     )
     val chevronRotation by animateFloatAsState(if (expanded) 0f else 180f)
 
     val triggerPadding = ForkTokens.Padding.dropdownPadding
     val dotGap = ForkTokens.Padding.dropdownDotGap
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.testBounds(testKey)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -103,14 +104,14 @@ fun ForkDropdown(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                resolveDropdownLabel(options, selectedIndex),
-                modifier = Modifier.weight(1f, fill = false).padding(end = dotGap),
-                color = textColor,
-                fontSize = 13.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+Text(
+                    resolveDropdownLabel(options, selectedIndex),
+                    modifier = Modifier.weight(1f, fill = false).padding(end = dotGap),
+                    color = textColor,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             Icon("up", modifier = Modifier.rotate(chevronRotation), color = textColor)
         }
 

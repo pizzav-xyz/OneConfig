@@ -1,23 +1,26 @@
 package org.polyfrost.oneconfig.internal.ui.layout.fork
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
-import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
+import androidx.compose.ui.graphics.Color
+import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTestHooks
 import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
 /**
- * Dark-orange config surface: icon rail + module grid.
+ * Dark-orange config surface (reference §1 Shell).
+ *
+ * Fullscreen dim scrim (black @55%, game visible behind) with the config drawn
+ * as a centered floating [ForkPanel] only — never a full-bleed dashboard.
+ * The rail stays fixed; the grid scrolls inside the panel.
  *
  * No header bar — the reference carries no title/search chrome inside the
  * panel; the rail selection is the only navigation.
@@ -27,6 +30,10 @@ fun ForkConfigSurface(
     onBack: (() -> Unit)? = null,
 ) {
     var selectedCategory by remember { mutableStateOf("combat") }
+    var toggles by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
+    val modules = remember(toggles) {
+        MockModules.modules.map { it.copy(enabled = toggles[it.id] ?: it.enabled) }
+    }
 
     val categories = remember {
         listOf(
@@ -39,36 +46,43 @@ fun ForkConfigSurface(
         )
     }
 
-    val theme = LocalTheme.current
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .background(theme.pageBackground.withOpacityPercent(90f)),
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
-        IconSidebar(
-            entries = categories,
-            selectedId = selectedCategory,
-            onSelected = { selectedCategory = it },
-            modifier = Modifier,
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.Black.withOpacityPercent(55f)),
         )
 
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(ForkTokens.Spacing.cardGap),
-        ) {
-            ModuleGrid(
-                modules = MockModules.modules,
-                onKeybindCapture = { module, key ->
-                    println("${module.id} -> $key")
-                },
-                onModuleToggle = { module, enabled ->
-                    println("${module.id} enabled=$enabled")
-                },
-                selectedCategory = selectedCategory,
-            )
+        ForkPanel {
+            Row {
+                IconSidebar(
+                    entries = categories,
+                    selectedId = selectedCategory,
+                    onSelected = { selectedCategory = it },
+                    modifier = Modifier,
+                )
+
+                ModuleGrid(
+                    modules = modules,
+                    onKeybindCapture = { module, key ->
+                        ForkTestHooks.record("keybind:${module.id}=$key")
+                        println("${module.id} -> $key")
+                    },
+                    onKeybindCancel = { module ->
+                        ForkTestHooks.record("keybind-cancel:${module.id}")
+                    },
+                    onModuleToggle = { module, enabled ->
+                        toggles = toggles + (module.id to enabled)
+                        ForkTestHooks.record("toggle:${module.id}=$enabled")
+                        println("${module.id} enabled=$enabled")
+                    },
+                    selectedCategory = selectedCategory,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }

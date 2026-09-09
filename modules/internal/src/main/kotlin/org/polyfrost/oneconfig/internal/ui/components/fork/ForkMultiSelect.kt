@@ -73,6 +73,7 @@ fun ForkMultiSelectDropdown(
     selectedFlags: BooleanArray,
     onToggle: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    testKey: String? = null,
 ) {
     val theme = LocalTheme.current
     var expanded by remember { mutableStateOf(false) }
@@ -96,7 +97,7 @@ fun ForkMultiSelectDropdown(
     val triggerPadding = ForkTokens.Padding.dropdownPadding
     val dotGap = ForkTokens.Padding.dropdownDotGap
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.testBounds(testKey)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

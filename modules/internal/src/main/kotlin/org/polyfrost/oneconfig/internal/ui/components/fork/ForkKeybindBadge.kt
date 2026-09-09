@@ -8,7 +8,6 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -31,12 +29,10 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
-import androidx.compose.foundation.shape.RoundedCornerShape
 
 /**
  * Fork-scoped keybind badge.
@@ -50,6 +46,7 @@ fun ForkKeybindBadge(
     onKeyCapture: (String) -> Unit,
     onCancel: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    testKey: String? = null,
 ) {
     val theme = LocalTheme.current
     val interactionSource = rememberInteractionSource()
@@ -82,6 +79,7 @@ fun ForkKeybindBadge(
     Row(
         modifier = modifier
             .widthIn(min = ForkTokens.Size.keybindMinWidth)
+            .testBounds(testKey)
             .onKeyEvent { event ->
                 if (!recording) return@onKeyEvent false
                 when (event.type) {
@@ -110,13 +108,8 @@ fun ForkKeybindBadge(
             .pointerHoverIcon(PointerIcon.Hand)
             .padding(horizontal = ForkTokens.Padding.keybindHorizontal, vertical = ForkTokens.Padding.keybindVertical),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(ForkTokens.Padding.dropdownDotGap),
+        horizontalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            "keyboard",
-            color = textColor,
-            modifier = Modifier.size(ForkTokens.Size.keybindIcon),
-        )
         Text(
             when {
                 recording -> "Press a key…"
@@ -124,7 +117,7 @@ fun ForkKeybindBadge(
                 else -> "—"
             },
             color = textColor,
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
         )
     }
