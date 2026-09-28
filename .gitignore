@@ -353,3 +353,20 @@ minecraft/versions/*/logs/
 minecraft/versions/*/mods/
 minecraft/versions/*/config/
 minecraft/versions/*/oneconfig/
+
+# local fork tooling state (not source)
+.audit-crops/
+.omo/
+.opencode/
+.repomix-context/
+
+# stonecutter-generated version trees (regenerable build outputs)
+minecraft/versions/
+
+# scratch audit/report dumps (kept only if cited by openspec log)
+AUDIT_*.md
+*_REPORT.md
+PROMPT_FOR_UI_SPECIALIST.md
+visual-similarity-*.md
+*-repomix.xml
+*.bak
