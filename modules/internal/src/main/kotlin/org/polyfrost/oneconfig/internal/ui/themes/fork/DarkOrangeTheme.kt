@@ -17,11 +17,14 @@ import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
  *
  * Accent decision (F5 P0, re-tinted to reference): salmon #FF9676 is canonical.
  * Rationale: hex-sampled from Figma spec (dominant accent cluster #FF9676 with
- * AA ramps #E4876C → #B06A5A). Fills are warm plum/cocoa (#2B1F2A card,
- * #241C1C rail) — the reference reads "warm cocoa", never cold slate.
+ * AA ramps #E4876C → #B06A5A). Panel and cards are neutral near-black (#17131A
+ * opaque) so the orange pops; warmth survives only on active fills, borders,
+ * glows, and the rail pill — never as plum surface tints.
  *
- * The glass-vs-opaque decision is a single token swap via [Color.copy(alpha = ...)] on [pageBackground]
- * plus optional BlurRenderer backdrop usage — see task 2.1.4 / 2.3.1.
+ * Backdrop blur comes from the host screen (`BlurRenderer`, fullscreen radius
+ * 8px — exactly the reference value), so the game behind the panel is already
+ * blurred; overlay dims at black 45% and the panel itself stays fully opaque
+ * because the Compose layer has no backdrop-blur for translucent surfaces.
  */
 val DarkOrangeTheme = UITheme(
     previewImage = "fork/dark-orange",
@@ -29,16 +32,16 @@ val DarkOrangeTheme = UITheme(
 
     // Page / surface backgrounds — alpha controls glass-vs-opaque intent
     pageBackground = Color(0x66141013),        // ~40% opaque for glass + BlurRenderer backdrop
-    sidebarBackground = Color(0x8B241C1C),     // semi-transparent cocoa rail fill
+    sidebarBackground = Color(0xFF1A1A1E),     // opaque neutral-dark rail fill
     chipBackground = Color(0x8B2E2129),        // semi-transparent warm chip / tag surface
-    modCardBackground = Color(0xB02B1F2A),     // warm plum glass card interior (sampled reference)
-    componentBackground = Color(0xCC251C22),   // warm control-row surface
+    modCardBackground = Color(0xFF17131A),    // neutral opaque panel (de-saturated per visual review)
+    componentBackground = Color(0xFF1F1D24),   // opaque neutral-dark control surface
     popupBackground = Color(0xCC251C22),       // warm dropdown / popup surface
 
     // Borders & text
     borderColor = Color(0x1AFFFFFF),           // 1px low-alpha border
     textColor = Color(0xFFFFF3EC),             // warm primary text
-    textColorSecondary = Color(0xFF9A8B84),    // warm secondary / placeholder text
+    textColorSecondary = Color(0xFFB9AEAE),    // muted labels + unselected options
     accentTextColor = Color(0xFFFFFFFF),       // accent text (white on dark)
 
     // Shadow & controls
