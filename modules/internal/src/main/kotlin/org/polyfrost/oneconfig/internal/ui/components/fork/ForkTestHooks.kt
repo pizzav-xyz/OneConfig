@@ -3,6 +3,7 @@ package org.polyfrost.oneconfig.internal.ui.components.fork
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -19,7 +20,7 @@ public object ForkTestHooks {
     }
 
     private val bounds = ConcurrentHashMap<String, Bounds>()
-    private val events = java.util.Collections.synchronizedList(mutableListOf<String>())
+    private val events = Collections.synchronizedList(mutableListOf<String>())
 
     public fun register(key: String, x: Float, y: Float, width: Float, height: Float) {
         bounds[key] = Bounds(x, y, width, height)
