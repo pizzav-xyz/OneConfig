@@ -18,7 +18,7 @@ import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 /**
  * Dark-orange config surface (reference §1 Shell).
  *
- * Fullscreen dim scrim (black @55%, game visible behind) with the config drawn
+ * Fullscreen dim scrim (black @45%, game visible behind) with the config drawn
  * as a centered floating [ForkPanel] only — never a full-bleed dashboard.
  * The rail stays fixed; the grid scrolls inside the panel.
  *
@@ -26,9 +26,7 @@ import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
  * panel; the rail selection is the only navigation.
  */
 @Composable
-fun ForkConfigSurface(
-    onBack: (() -> Unit)? = null,
-) {
+fun ForkConfigSurface() {
     var selectedCategory by remember { mutableStateOf("combat") }
     var toggles by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
     val modules = remember(toggles) {
@@ -39,10 +37,10 @@ fun ForkConfigSurface(
         listOf(
             SidebarEntry("combat", "combat"),
             SidebarEntry("player", "profiles"),
-            SidebarEntry("movement", "move"),
-            SidebarEntry("render", "paintbrush"),
-            SidebarEntry("world", "layers"),
-            SidebarEntry("misc", "qol"),
+            SidebarEntry("movement", "chevrons"),
+            SidebarEntry("render", "eye"),
+            SidebarEntry("world", "grid"),
+            SidebarEntry("misc", "close"),
         )
     }
 
@@ -53,7 +51,7 @@ fun ForkConfigSurface(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(Color.Black.withOpacityPercent(55f)),
+                .background(Color.Black.withOpacityPercent(45f)),
         )
 
         ForkPanel {
@@ -69,7 +67,6 @@ fun ForkConfigSurface(
                     modules = modules,
                     onKeybindCapture = { module, key ->
                         ForkTestHooks.record("keybind:${module.id}=$key")
-                        println("${module.id} -> $key")
                     },
                     onKeybindCancel = { module ->
                         ForkTestHooks.record("keybind-cancel:${module.id}")
@@ -77,7 +74,6 @@ fun ForkConfigSurface(
                     onModuleToggle = { module, enabled ->
                         toggles = toggles + (module.id to enabled)
                         ForkTestHooks.record("toggle:${module.id}=$enabled")
-                        println("${module.id} enabled=$enabled")
                     },
                     selectedCategory = selectedCategory,
                     modifier = Modifier.weight(1f),

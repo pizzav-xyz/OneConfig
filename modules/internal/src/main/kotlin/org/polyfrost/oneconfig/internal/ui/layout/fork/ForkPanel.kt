@@ -1,22 +1,20 @@
 package org.polyfrost.oneconfig.internal.ui.layout.fork
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.unit.Constraints
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
-import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
 /** Fraction of the viewport height the panel may grow to (reference §1: 82%). */
 private const val PanelMaxHeightFraction = 0.82f
@@ -25,7 +23,7 @@ private const val PanelMaxHeightFraction = 0.82f
  * Centered floating config panel (reference §1 Shell).
  *
  * Max width [ForkTokens.Size.panelMaxWidth], max height 82% of the viewport,
- * panel radius, 16dp shadow, card fill at 100%, 1dp border at 50%.
+ * panel radius, 16dp shadow, card fill at 100%, no border.
  * Height is intrinsic up to the max: short content packs tight, tall content
  * is capped so the grid scrolls *inside* the panel while the rail stays fixed.
  */
@@ -38,13 +36,21 @@ fun ForkPanel(
         contentAlignment = Alignment.Center,
     ) {
         val theme = LocalTheme.current
+        val panelWidth =
+            if (maxWidth >= ForkTokens.Size.panelMaxWidth) ForkTokens.Size.panelMaxWidth
+            else maxWidth - ForkTokens.Padding.gridEmptyTop * 2
         Box(
             modifier = Modifier
-                .widthIn(max = ForkTokens.Size.panelMaxWidth)
-                .heightIn(max = maxHeight * PanelMaxHeightFraction)
-                .shadow(ForkTokens.Size.panelShadow, ForkTokens.panelShape, clip = false)
-                .background(theme.modCardBackground.withOpacityPercent(100f), ForkTokens.panelShape)
-                .border(ForkTokens.Size.cardBorder, theme.borderColor.withOpacityPercent(50f), ForkTokens.panelShape)
+                .width(panelWidth)
+                .heightIn(min = ForkTokens.Size.panelMinHeight, max = maxHeight * PanelMaxHeightFraction)
+                .shadow(
+                    ForkTokens.Size.panelShadow,
+                    ForkTokens.panelShape,
+                    clip = false,
+                    ambientColor = Color.Black.copy(alpha = 0.6f),
+                    spotColor = Color.Black.copy(alpha = 0.6f),
+                )
+                .background(theme.modCardBackground, ForkTokens.panelShape)
                 .clip(ForkTokens.panelShape),
         ) {
             CappedIntrinsicHeight(content)

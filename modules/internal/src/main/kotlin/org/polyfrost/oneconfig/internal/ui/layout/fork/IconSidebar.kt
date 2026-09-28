@@ -2,6 +2,7 @@ package org.polyfrost.oneconfig.internal.ui.layout.fork
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -18,20 +19,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.unit.dp
 import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.PlayerHead
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
 import org.polyfrost.oneconfig.internal.ui.components.fork.testBounds
+import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
@@ -43,7 +43,7 @@ import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
  * coordinate so the 1px line is absorbed inside the background fill — this removes the AA halo
  * that Compose's default `border` modifier produces on integer boundaries.
  *
- * P5 parity: selected entry renders an accent fill plus a soft glow behind it;
+ * Selected entry renders a warm pill behind the coral [Accent] icon tint;
  * hover is a separate, muted tint so it does not read as selected.
  */
 @Composable
@@ -53,6 +53,7 @@ fun IconSidebar(
     onSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     onChildSelected: (Pair<String, String>) -> Unit = {},
+    testKeyPrefix: String = "rail",
 ) {
     val theme = LocalTheme.current
     val width = ForkTokens.Size.sidebarWidth
@@ -81,6 +82,12 @@ fun IconSidebar(
         verticalArrangement = Arrangement.spacedBy(railGap),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // Rail separator (CSS): 16px white-0.12 rule between logo and categories.
+        Box(
+            modifier = Modifier
+                .size(ForkTokens.Size.sidebarIcon, ForkTokens.Size.cardBorder)
+                .background(Color.White.copy(alpha = ForkTokens.Alpha.separatorFill)),
+        )
         entries.forEach { entry ->
             val selectedEntry = entries.find { it.id == selectedId || it.children.any { child -> child.id == selectedId } }
             val isThisSelected = entry == selectedEntry
@@ -92,7 +99,7 @@ fun IconSidebar(
 
             val itemBg by animateColorAsState(
                 when {
-                    isSelected -> theme.accentColor
+                    isSelected -> Accent.copy(alpha = 0.14f)
                     isThisSelected && childSelection != null -> theme.textColor.copy(alpha = 0.12f)
                     isHovered -> theme.textColor.copy(alpha = 0.10f)
                     else -> Color.Transparent
@@ -100,7 +107,7 @@ fun IconSidebar(
             )
             val itemTint by animateColorAsState(
                 when {
-                    isSelected -> theme.accentTextColor
+                    isSelected -> Accent
                     isThisSelected && childSelection != null -> theme.textColor
                     isHovered -> theme.textColor
                     else -> theme.textColorSecondary
@@ -113,25 +120,12 @@ fun IconSidebar(
                         .size(itemSize),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (isSelected) {
-                        Box(
-                            modifier = Modifier
-                                .size(itemSize)
-                                .clip(theme.sideBarNavigationEntryShape)
-                                .background(
-                                    theme.accentColor.withOpacityPercent(35f),
-                                    theme.sideBarNavigationEntryShape,
-                                )
-                                .blur(7.dp),
-                        )
-                    }
-
                     Box(
                         modifier = Modifier
                             .size(itemSize)
-                            .testBounds("rail-" + entry.id)
-                            .clip(theme.sideBarNavigationEntryShape)
-                            .background(itemBg, theme.sideBarNavigationEntryShape)
+                            .testBounds(testKeyPrefix + "-" + entry.id)
+                            .clip(ForkTokens.railPillShape)
+                            .background(itemBg, ForkTokens.railPillShape)
                             .onClick(interactionSource) { onSelected(entry.id) }
                             .hoverable(interactionSource)
                             .pointerHoverIcon(PointerIcon.Hand),
@@ -147,12 +141,12 @@ fun IconSidebar(
 
                 if (isThisSelected && entry.children.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(railGap))
-                    Row(
+                    Column(
                         modifier = Modifier
                             .width(subRailWidth)
                             .height(subRailItem * entry.children.size + railGap * (entry.children.size - 1)),
-                        horizontalArrangement = Arrangement.spacedBy(railGap),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(railGap),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         entry.children.forEach { child ->
                             val childSelected = child.id == selectedId
@@ -161,14 +155,14 @@ fun IconSidebar(
 
                             val childBg by animateColorAsState(
                                 when {
-                                    childSelected -> theme.accentColor
+                                    childSelected -> Accent.copy(alpha = 0.14f)
                                     isChildHovered -> theme.textColor.copy(alpha = 0.10f)
                                     else -> Color.Transparent
                                 }
                             )
                             val childTint by animateColorAsState(
                                 when {
-                                    childSelected -> theme.accentTextColor
+                                    childSelected -> Accent
                                     isChildHovered -> theme.textColor
                                     else -> theme.textColorSecondary
                                 }
@@ -177,8 +171,8 @@ fun IconSidebar(
                             Box(
                                 modifier = Modifier
                                     .size(subRailItem)
-                                    .clip(theme.sideBarNavigationEntryShape)
-                                    .background(childBg, theme.sideBarNavigationEntryShape)
+                                    .clip(ForkTokens.railPillShape)
+                                    .background(childBg, ForkTokens.railPillShape)
                                     .onClick(childInteractionSource) { onChildSelected(entry.id to child.id) }
                                     .hoverable(childInteractionSource)
                                     .pointerHoverIcon(PointerIcon.Hand),
@@ -201,10 +195,19 @@ fun IconSidebar(
         Box(
             modifier = Modifier
                 .padding(bottom = ForkTokens.Padding.avatarInset)
-                .size(ForkTokens.Size.avatar),
+                .size(ForkTokens.Size.avatarRing)
+                .border(
+                    ForkTokens.Size.avatarRingBorder,
+                    Accent,
+                    theme.circleShape,
+                ),
             contentAlignment = Alignment.Center,
         ) {
-            PlayerHead(modifier = Modifier.fillMaxHeight())
+            PlayerHead(
+                modifier = Modifier
+                    .size(ForkTokens.Size.avatar)
+                    .clip(theme.circleShape),
+            )
         }
     }
 }
