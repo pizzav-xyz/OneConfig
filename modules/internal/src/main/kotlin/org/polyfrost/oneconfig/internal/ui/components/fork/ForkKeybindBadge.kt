@@ -4,10 +4,14 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
@@ -27,11 +32,12 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
+import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 
 /**
@@ -46,31 +52,28 @@ fun ForkKeybindBadge(
     onKeyCapture: (String) -> Unit,
     onCancel: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     testKey: String? = null,
 ) {
     val theme = LocalTheme.current
     val interactionSource = rememberInteractionSource()
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val isFocused by interactionSource.collectIsFocusedAsState()
     var recording by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
     val bgColor by animateColorAsState(
         when {
-            recording -> theme.accentColor.copy(alpha = 0.2f)
-            isHovered -> theme.componentBackground.copy(alpha = 0.8f)
-            else -> theme.componentBackground
-        }
-    )
-    val borderColor by animateColorAsState(
-        when {
             recording -> theme.accentColor
-            isHovered -> theme.textColor.copy(alpha = 0.2f)
-            else -> theme.textColor.copy(alpha = 0.2f)
+            isHovered -> theme.componentBackground.copy(alpha = 0.8f)
+            enabled -> Accent.copy(alpha = ForkTokens.Alpha.controlFill)
+            else -> Color.White.copy(alpha = ForkTokens.Alpha.disabledFill)
         }
     )
     val textColor by animateColorAsState(
-        if (recording) theme.accentColor else theme.textColor
+        if (recording) theme.shadowColor else theme.textColor
     )
+    val ringColor by animateColorAsState(if (isFocused) Accent else Color.Transparent)
 
     LaunchedEffect(recording) {
         if (recording) focusRequester.requestFocus()
@@ -79,6 +82,7 @@ fun ForkKeybindBadge(
     Row(
         modifier = modifier
             .widthIn(min = ForkTokens.Size.keybindMinWidth)
+            .heightIn(min = ForkTokens.Size.keybindHeight)
             .testBounds(testKey)
             .onKeyEvent { event ->
                 if (!recording) return@onKeyEvent false
@@ -101,25 +105,43 @@ fun ForkKeybindBadge(
                 }
             }
             .focusRequester(focusRequester)
-            .focusable()
+            .focusable(interactionSource = interactionSource)
             .background(bgColor, ForkTokens.pillShape)
-            .border(ForkTokens.Size.controlBorder, borderColor, ForkTokens.pillShape)
+            .border(
+                ForkTokens.Size.focusRing,
+                ringColor,
+                ForkTokens.pillShape,
+            )
             .onClick(interactionSource) { recording = !recording }
             .pointerHoverIcon(PointerIcon.Hand)
             .padding(horizontal = ForkTokens.Padding.keybindHorizontal, vertical = ForkTokens.Padding.keybindVertical),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        Text(
-            when {
-                recording -> "Press a key…"
-                keyName != null -> keyName
-                else -> "—"
-            },
-            color = textColor,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.SemiBold,
-        )
+        val label = when {
+            recording -> "KEY…"
+            else -> keyName
+        }
+        if (label != null) {
+            Text(
+                label,
+                color = textColor,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        } else {
+            Box(
+                modifier = Modifier.size(
+                    ForkTokens.Size.keybindDashWidth,
+                    ForkTokens.Size.keybindDashHeight,
+                ).background(
+                    if (enabled) Accent
+                    else Color.White.copy(alpha = ForkTokens.Alpha.disabledContent),
+                ),
+            )
+        }
     }
 }
 

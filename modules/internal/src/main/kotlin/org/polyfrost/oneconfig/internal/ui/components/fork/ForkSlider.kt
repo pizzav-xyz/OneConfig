@@ -1,7 +1,8 @@
 package org.polyfrost.oneconfig.internal.ui.components.fork
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -23,8 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
@@ -32,10 +31,11 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.polyfrost.oneconfig.internal.ui.components.Text
+import org.polyfrost.oneconfig.internal.ui.layout.fork.LocalModuleActive
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
+import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
 import kotlin.math.roundToInt
 
@@ -63,7 +63,7 @@ fun ForkSlider(
     var trackWidthPx by remember { mutableStateOf(0f) }
     val fraction by animateFloatAsState(
         ((value - min) / (max - min)).coerceIn(0f, 1f),
-        animationSpec = androidx.compose.animation.core.spring(),
+        animationSpec = spring(),
     )
     val interactionSource = rememberInteractionSource()
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -100,7 +100,7 @@ fun ForkSlider(
                 .height(trackHeight)
                 .align(Alignment.CenterStart)
                 .clip(theme.checkBoxShape)
-                .background(theme.controlTrackColor)
+                .background(Accent.copy(alpha = ForkTokens.Alpha.controlFill))
         )
         Box(
             Modifier
@@ -115,17 +115,8 @@ fun ForkSlider(
                 .align(Alignment.CenterStart)
                 .offset { IntOffset((fraction * (trackWidthPx - thumbSize.toPx())).toInt(), 0) }
                 .size(thumbSize)
-                .drawWithContent {
-                    // Solid ring in track color prevents alpha-blend halo.
-                    drawCircle(
-                        color = theme.controlTrackColor,
-                        radius = this.size.minDimension / 2f,
-                    )
-                    drawCircle(
-                        color = theme.controlThumbColor,
-                        radius = this.size.minDimension / 2f - ForkTokens.Size.sliderThumbRing.toPx(),
-                    )
-                }
+                .clip(theme.circleShape)
+                .background(Color.White),
         )
     }
 }
@@ -167,17 +158,17 @@ fun ForkSliderRow(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                label,
-                color = theme.textColor,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-            )
+                    label,
+                    color = theme.textColor,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                )
             Text(
-                valueText,
-                color = theme.textColorSecondary,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Normal,
-            )
+                    valueText,
+                    color = if (LocalModuleActive.current) Accent else theme.textColorSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                )
         }
         ForkSlider(
             value = value,
