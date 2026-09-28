@@ -1,7 +1,6 @@
 package org.polyfrost.oneconfig.internal.ui.layout.fork
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.fork.ForkTokens
@@ -45,7 +43,7 @@ fun ModuleGrid(
         modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(gap),
+            .padding(ForkTokens.Padding.gridOuter),
         verticalArrangement = Arrangement.spacedBy(gap),
     ) {
         if (visibleModules.isEmpty()) {
@@ -56,47 +54,64 @@ fun ModuleGrid(
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 32.dp),
+                    .padding(top = ForkTokens.Padding.gridEmptyTop),
             )
             return@Column
         }
 
-        visibleModules.chunked(2).forEach { rowModules ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(gap),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(gap),
+            verticalAlignment = Alignment.Top,
+        ) {
+            val left = visibleModules.filterIndexed { index, _ -> index % 2 == 0 }
+            val right = visibleModules.filterIndexed { index, _ -> index % 2 == 1 }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(gap),
             ) {
-                val first = rowModules.first()
-                Box(modifier = Modifier.weight(1f)) {
-                    ModuleCard(
-                        title = first.title,
-                        category = first.category,
-                        keybind = first.keybind,
-                        onKeybindCapture = { onKeybindCapture(first, it) },
-                        onKeybindCancel = { onKeybindCancel(first) },
-                        enabled = first.enabled,
-                        onEnabledChange = { onModuleToggle(first, it) },
-                        testKey = first.id,
-                        body = first.bodyComposable,
+                left.forEach { module ->
+                    ModuleGridCard(
+                        module = module,
+                        onKeybindCapture = onKeybindCapture,
+                        onKeybindCancel = onKeybindCancel,
+                        onModuleToggle = onModuleToggle,
                     )
                 }
-                if (rowModules.size > 1) {
-                    val second = rowModules[1]
-                    Box(modifier = Modifier.weight(1f)) {
-                        ModuleCard(
-                            title = second.title,
-                            category = second.category,
-                            keybind = second.keybind,
-                            onKeybindCapture = { onKeybindCapture(second, it) },
-                            onKeybindCancel = { onKeybindCancel(second) },
-                            enabled = second.enabled,
-                            onEnabledChange = { onModuleToggle(second, it) },
-                            testKey = second.id,
-                            body = second.bodyComposable,
-                        )
-                    }
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(gap),
+            ) {
+                right.forEach { module ->
+                    ModuleGridCard(
+                        module = module,
+                        onKeybindCapture = onKeybindCapture,
+                        onKeybindCancel = onKeybindCancel,
+                        onModuleToggle = onModuleToggle,
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ModuleGridCard(
+    module: MockModule,
+    onKeybindCapture: (MockModule, String) -> Unit,
+    onKeybindCancel: (MockModule) -> Unit,
+    onModuleToggle: (MockModule, Boolean) -> Unit,
+) {
+    ModuleCard(
+        title = module.title,
+        keybind = module.keybind,
+        onKeybindCapture = { onKeybindCapture(module, it) },
+        onKeybindCancel = { onKeybindCancel(module) },
+        enabled = module.enabled,
+        onEnabledChange = { onModuleToggle(module, it) },
+        testKey = module.id,
+        disabled = module.disabled,
+        body = module.bodyComposable,
+    )
 }

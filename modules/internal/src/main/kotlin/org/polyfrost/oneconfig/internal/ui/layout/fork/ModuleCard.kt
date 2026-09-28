@@ -12,13 +12,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,15 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.polyfrost.oneconfig.internal.ui.components.Icon
 import org.polyfrost.oneconfig.internal.ui.components.Text
@@ -47,7 +46,6 @@ import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
 import org.polyfrost.oneconfig.internal.ui.themes.Accent
 import org.polyfrost.oneconfig.internal.ui.themes.LocalTheme
-import org.polyfrost.oneconfig.internal.ui.themes.withOpacityPercent
 
 /**
  * Visual row inside a module card body.
@@ -74,15 +72,15 @@ fun ForkSettingRow(
         Column {
             Text(
                 label,
-                color = theme.textColorSecondary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
+                color = theme.textColor,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
             )
             value?.let {
                 Text(
                     it,
                     color = theme.textColorSecondary,
-                    fontSize = 10.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
                 )
             }
@@ -92,19 +90,70 @@ fun ForkSettingRow(
 }
 
 /**
- * A single module card: compact header with title, category icon, keybind, toggle, and collapse
+ * Stacked setting row for full-width controls (reference dropdown pattern).
+ *
+ * Label row on top (label left, optional value right), full-width control
+ * beneath — mirrors [ForkSliderRow]. Used for dropdown / multi-select rows;
+ * checkbox rows stay inline via [ForkSettingRow].
+ */
+@Composable
+fun ForkStackedRow(
+    label: String,
+    valueText: String? = null,
+    modifier: Modifier = Modifier,
+    control: @Composable () -> Unit,
+) {
+    val theme = LocalTheme.current
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(ForkTokens.Padding.controlRowVertical),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                label,
+                color = theme.textColor,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+            )
+            valueText?.let {
+                Text(
+                    it,
+                    color = if (LocalModuleActive.current) Accent else theme.textColorSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+        }
+        control()
+    }
+}
+
+/**
+ * A single module card: compact header with title, keybind, toggle, and collapse
  * affordance, plus an optional expandable body.
  *
  * Dimensions are sourced from [ForkTokens]: card padding, row gap, radius.card, and border width.
- * A 1px accent top-sheen is drawn when enabled; an ambient accent ring is drawn in the background.
+ * Three visual states: active (warm fill + accent border + glow), inactive (neutral fill + border),
+ * disabled (uniform 0.45 opacity). Toggle-off bodies render muted; disabled dimming applies once, card-wide.
  * Disabled cards remain interactive for collapse, and the body stays rendered but visually muted.
  *
  * Collapse state is session-remembered unless an explicit [collapsed] override is passed.
  */
+
+/**
+ * Whether the enclosing [ModuleCard] is switched on. Value rows read this to
+ * render neutral hues when off (CSS off-column reads gray, not dimmed coral).
+ * Defaults to true so standalone rows keep accent values.
+ */
+public val LocalModuleActive: ProvidableCompositionLocal<Boolean> = compositionLocalOf { true }
+
 @Composable
 fun ModuleCard(
     title: String,
-    category: String? = null,
     keybind: String?,
     onKeybindCapture: (String) -> Unit,
     onKeybindCancel: () -> Unit = {},
@@ -113,6 +162,7 @@ fun ModuleCard(
     modifier: Modifier = Modifier,
     collapsed: Boolean? = null,
     testKey: String? = null,
+    disabled: Boolean = false,
     body: @Composable () -> Unit,
 ) {
     val theme = LocalTheme.current
@@ -122,88 +172,60 @@ fun ModuleCard(
     var collapsedState by remember { mutableStateOf(false) }
     val collapsedFinal = collapsed ?: collapsedState
 
-    val borderColor by animateColorAsState(
-        if (enabled) {
-            if (isHovered) theme.borderColor else theme.borderColor.copy(alpha = 0.5f)
-        } else {
-            theme.borderColor.copy(alpha = 0.35f)
-        }
-    )
     val titleColor by animateColorAsState(
-        if (enabled) theme.textColor else theme.textColor.copy(alpha = 0.82f)
+        if (enabled && !disabled) theme.textColor else theme.textColor.copy(alpha = ForkTokens.Alpha.disabledTitle)
+    )
+    val cardFill by animateColorAsState(
+        if (enabled && !disabled) Accent.copy(alpha = ForkTokens.Alpha.cardActiveFill)
+        else Color.White.copy(alpha = ForkTokens.Alpha.cardInactiveFill)
+    )
+    val cardBorder by animateColorAsState(
+        if (enabled && !disabled) Accent.copy(alpha = ForkTokens.Alpha.cardActiveBorder)
+        else Color.White.copy(alpha = ForkTokens.Alpha.cardInactiveBorder)
     )
 
-    val chevronRotation by animateFloatAsState(if (collapsedFinal) 0f else 180f)
+    val chevronRotation by animateFloatAsState(if (collapsedFinal) 180f else 0f)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .testBounds(testKey?.let { "$it-card" })
+            .then(
+                if (enabled && !disabled) Modifier.shadow(
+                    ForkTokens.Size.cardBorder * 8,
+                    ForkTokens.cardShape,
+                    clip = false,
+                    ambientColor = Accent.copy(alpha = ForkTokens.Alpha.cardGlow),
+                    spotColor = Accent.copy(alpha = ForkTokens.Alpha.cardGlow),
+                ) else Modifier
+            )
             .clip(ForkTokens.cardShape)
-            .background(theme.modCardBackground.withOpacityPercent(92f), ForkTokens.cardShape)
-            .border(ForkTokens.Size.cardBorder, borderColor, ForkTokens.cardShape)
-            .drawBehind {
-                // Top sheen: accent gradient fades across the top border.
-                val sheenAlpha = if (enabled) 0.28f else 0f
-                if (sheenAlpha > 0f) {
-                    drawLine(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(theme.accentColor.copy(alpha = sheenAlpha), Color.Transparent),
-                            startX = 0f,
-                            endX = size.width,
-                        ),
-                        start = Offset(0f, ForkTokens.Size.cardBorder.toPx()),
-                        end = Offset(size.width, ForkTokens.Size.cardBorder.toPx()),
-                        strokeWidth = ForkTokens.Size.cardBorder.toPx(),
-                    )
-                }
-            }
-            .drawBehind {
-                // Ambient accent ring behind the card.
-                val glowAlpha = if (enabled) 0.08f else 0f
-                if (glowAlpha > 0f) {
-                    drawCircle(
-                        color = Accent.copy(alpha = glowAlpha),
-                        radius = size.minDimension / 2f + 12f,
-                    )
-                }
-            }
-            .alpha(if (enabled) 1f else 0.82f)
+            .background(cardFill, ForkTokens.cardShape)
+            .border(ForkTokens.Size.cardBorder, cardBorder, ForkTokens.cardShape)
+            .then(if (disabled) Modifier.alpha(ForkTokens.Alpha.disabledOpacity) else Modifier)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(ForkTokens.Padding.card),
+                .padding(
+                    horizontal = ForkTokens.Padding.cardHorizontal,
+                    vertical = ForkTokens.Padding.card,
+                ),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = ForkTokens.Size.toggleTrackHeight * 2),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val catIcon = when (category) {
-                        "combat" -> "combat"
-                        "player" -> "profiles"
-                        "movement" -> "move"
-                        "render" -> "paintbrush"
-                        "world" -> "layers"
-                        "misc" -> "qol"
-                        else -> "settings"
-                    }
-                    Icon(
-                        catIcon,
-                        color = theme.accentColor,
-                        modifier = Modifier
-                            .size(ForkTokens.Size.sidebarIcon * 2f)
-                            .offset(y = 1.dp),
-                    )
-                    Spacer(Modifier.width(6.dp))
                     Text(
                         title,
                         color = titleColor,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
 
@@ -212,19 +234,20 @@ fun ModuleCard(
                         keyName = keybind,
                         onKeyCapture = onKeybindCapture,
                         onCancel = onKeybindCancel,
-                        modifier = Modifier.width(ForkTokens.Size.keybindMinWidth),
+                        enabled = enabled && !disabled,
                         testKey = testKey?.let { "$it-keybind" },
                     )
                     Spacer(Modifier.width(ForkTokens.Padding.toggleLabelGap))
                     ForkToggle(
                         checked = enabled,
                         onCheckedChange = onEnabledChange,
+                        enabled = !disabled,
                         testKey = testKey?.let { "$it-toggle" },
                     )
-                    Spacer(Modifier.width(ForkTokens.Padding.toggleLabelGap))
+                    Spacer(Modifier.width(ForkTokens.Padding.chevronGap))
                     Box(
                         modifier = Modifier
-                            .size(ForkTokens.Size.sidebarIcon)
+                            .size(ForkTokens.Size.chevron)
                             .testBounds(testKey?.let { "$it-collapse" })
                             .clip(ForkTokens.cardShape)
                             .background(
@@ -236,30 +259,25 @@ fun ModuleCard(
                             .pointerHoverIcon(PointerIcon.Hand),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            if (collapsedFinal) "v" else "^",
-                            color = if (enabled) theme.textColorSecondary else theme.textColor.copy(alpha = 0.5f),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.rotate(chevronRotation),
+                        Icon(
+                            "up",
+                            color = theme.textColorSecondary,
+                            modifier = Modifier.size(ForkTokens.Size.chevron).rotate(chevronRotation),
                         )
                     }
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = ForkTokens.Padding.rowGap)
-                    .height(ForkTokens.Size.cardBorder)
-                    .background(theme.borderColor.copy(alpha = 0.5f)),
-            )
-
             AnimatedVisibility(!collapsedFinal) {
                 Column(
+                    modifier = Modifier
+                        .padding(top = ForkTokens.Padding.cardHeaderGap)
+                        .then(if (!enabled && !disabled) Modifier.alpha(ForkTokens.Alpha.disabledOpacity) else Modifier),
                     verticalArrangement = Arrangement.spacedBy(ForkTokens.Padding.rowGap),
                 ) {
-                    body()
+                    CompositionLocalProvider(LocalModuleActive provides enabled) {
+                        body()
+                    }
                 }
             }
         }
