@@ -1,6 +1,7 @@
 package org.polyfrost.oneconfig.test.e2e;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.polyfrost.oneconfig.api.event.v1.EventManager;
@@ -23,6 +24,7 @@ public class E2ETestRunner {
 
     private E2ETestRunner() {
         tests.put("configui", r -> new ConfigUITest(r).run());
+        tests.put("clickui", r -> new ConfigUIClickTest(r).run());
     }
 
     public static void init() {
@@ -95,5 +97,19 @@ public class E2ETestRunner {
 
     public Minecraft mc() {
         return Minecraft.getInstance();
+    }
+
+    public static Screen getCurrentScreen() {
+        try {
+            Object mc = Minecraft.getInstance();
+            try {
+                return (Screen) mc.getClass().getField("screen").get(mc);
+            } catch (NoSuchFieldException e) {
+                Object gui = mc.getClass().getField("gui").get(mc);
+                return (Screen) gui.getClass().getMethod("screen").invoke(gui);
+            }
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

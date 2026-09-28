@@ -508,6 +508,59 @@ abstract class ComposeScreen(
         }
     }
 
+    /**
+     * Test-only synthetic pointer/key input in compose-window pixels, driving the
+     * scene exactly like real input. Used by the E2E click-through test.
+     */
+    fun testMove(x: Float, y: Float): Boolean {
+        return withScene { it.sendPointerEvent(PointerEventType.Move, Offset(x, y)) } != null
+    }
+
+    fun testTap(x: Float, y: Float): Boolean {
+        return withScene {
+            val pos = Offset(x, y)
+            it.sendPointerEvent(PointerEventType.Press, pos, button = PointerButton.Primary)
+            it.sendPointerEvent(PointerEventType.Release, pos, button = PointerButton.Primary)
+        } != null
+    }
+
+    /** Test-only press without release (for pressed-state screenshots). Pair with [testRelease]. */
+    fun testPress(x: Float, y: Float): Boolean {
+        return withScene {
+            it.sendPointerEvent(PointerEventType.Press, Offset(x, y), button = PointerButton.Primary)
+        } != null
+    }
+
+    fun testRelease(x: Float, y: Float): Boolean {
+        return withScene {
+            it.sendPointerEvent(PointerEventType.Release, Offset(x, y), button = PointerButton.Primary)
+        } != null
+    }
+
+    fun testDrag(x0: Float, y0: Float, x1: Float, y1: Float, steps: Int = 16): Boolean {
+        return withScene { scene ->
+            scene.sendPointerEvent(PointerEventType.Press, Offset(x0, y0), button = PointerButton.Primary)
+            for (i in 1..steps) {
+                val t = i / steps.toFloat()
+                scene.sendPointerEvent(PointerEventType.Move, Offset(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t))
+            }
+            scene.sendPointerEvent(PointerEventType.Release, Offset(x1, y1), button = PointerButton.Primary)
+        } != null
+    }
+
+    /** Test-only: whether any node in the scene currently holds focus. */
+    fun testHasFocus(): Boolean {
+        return withScene { it.focusManager.hasFocus } ?: false
+    }
+
+    /** Synthetic key press+release by GLFW key code (see [sendKeyPressedEvent]). */
+    fun testKeyTap(glfwKey: Int): Boolean {
+        if (liveScene() == null) return false
+        sendKeyPressedEvent(glfwKey, 0)
+        sendKeyReleasedEvent(glfwKey, 0)
+        return true
+    }
+
     //? >= 1.21.10 {
     override fun charTyped(event: CharacterEvent): Boolean {
         val char = Char(event.codepoint)

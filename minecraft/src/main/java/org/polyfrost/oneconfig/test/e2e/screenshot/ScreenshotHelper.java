@@ -10,6 +10,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +24,26 @@ public final class ScreenshotHelper {
             .resolve("run/screenshots");
 
     private ScreenshotHelper() {}
+
+    /**
+     * Polls for a screenshot file with the given prefix written at or after
+     * {@code sinceMs}. Returns the file, or null on timeout.
+     */
+    public static java.io.File awaitScreenshot(String prefix, long sinceMs, long timeoutMs) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + timeoutMs;
+        while (System.currentTimeMillis() < deadline) {
+            java.io.File[] files = SCREENSHOTS_DIR.toFile().listFiles((d, n) -> {
+                java.io.File f = new java.io.File(d, n);
+                return n.startsWith(prefix) && n.endsWith(".png") && f.lastModified() >= sinceMs && f.length() > 0;
+            });
+            if (files != null && files.length > 0) {
+                Arrays.sort(files, Comparator.comparingLong(java.io.File::lastModified).reversed());
+                return files[0];
+            }
+            Thread.sleep(500);
+        }
+        return null;
+    }
 
     public static String takeScreenshot(Minecraft mc, String testName) throws IOException {
         Files.createDirectories(SCREENSHOTS_DIR);

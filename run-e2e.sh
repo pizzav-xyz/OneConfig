@@ -58,11 +58,11 @@ wait "${CLIENT_PID}" 2>/dev/null || true
 # Report screenshots (Java-window pinned via ScreenshotHelper, stonecutter run dir is minecraft/run)
 for dir in "minecraft/run/screenshots" "minecraft/run/run/screenshots" "run/screenshots"; do
     if [ -d "$dir" ]; then
-        SCREENSHOTS=$(find "$dir" -name "*.png" -mmin -5 2>/dev/null | head -20)
+        SCREENSHOTS=$(find "$dir" -name "*.png" -mmin -5 2>/dev/null | head -20 || true)
         if [ -n "${SCREENSHOTS}" ]; then
             echo "=== Screenshots captured (Java-window pinned) in $dir ==="
             echo "${SCREENSHOTS}"
-            ls -lh $SCREENSHOTS 2>&1 | head -20
+            ls -lh $SCREENSHOTS 2>&1 | head -20 || true
         fi
     fi
 done

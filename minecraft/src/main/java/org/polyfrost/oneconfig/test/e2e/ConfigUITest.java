@@ -27,7 +27,7 @@ public class ConfigUITest {
                 runner.pass("configui: 2s elapsed, checking screen");
                 Minecraft mc = runner.mc();
 
-                Screen current = getCurrentScreen();
+                Screen current = E2ETestRunner.getCurrentScreen();
                 runner.pass("configui: current screen is " + current);
                 boolean uiOpen = current instanceof OneConfigUIScreen;
                 if (!uiOpen) {
@@ -64,7 +64,7 @@ public class ConfigUITest {
                                     new Thread(() -> {
                                         try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
                                         Minecraft.getInstance().execute(() -> {
-                                            Screen after = getCurrentScreen();
+                                            Screen after = E2ETestRunner.getCurrentScreen();
                                             if (after == null || !(after instanceof OneConfigUIScreen)) {
                                                 runner.pass("configui: UI closed successfully (now " + after + ")");
                                             } else {
@@ -92,17 +92,4 @@ public class ConfigUITest {
         }).start();
     }
 
-    private static Screen getCurrentScreen() {
-        try {
-            Object mc = Minecraft.getInstance();
-            try {
-                return (Screen) mc.getClass().getField("screen").get(mc);
-            } catch (NoSuchFieldException e) {
-                Object gui = mc.getClass().getField("gui").get(mc);
-                return (Screen) gui.getClass().getMethod("screen").invoke(gui);
-            }
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }
