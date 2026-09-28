@@ -29,15 +29,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -74,21 +77,23 @@ fun ForkMultiSelectDropdown(
     onToggle: (Int) -> Unit,
     modifier: Modifier = Modifier,
     testKey: String? = null,
+    testKeyPrefix: String? = testKey,
 ) {
     val theme = LocalTheme.current
     var expanded by remember { mutableStateOf(false) }
-    var triggerHeightPx by remember { mutableStateOf(0) }
+    val trigger = rememberDropdownTriggerMetrics()
 
     val triggerInteraction = rememberInteractionSource()
     val isHovered by triggerInteraction.collectIsHoveredAsState()
 
-    val borderColor by animateColorAsState(if (expanded) Accent else theme.borderColor)
+    val borderColor by animateColorAsState(if (expanded) Accent else Color.White.copy(alpha = ForkTokens.Alpha.triggerBorder))
     val textColor by animateColorAsState(
         if (isHovered || expanded) theme.textColor else theme.textColorSecondary
     )
+    val chevronColor by animateColorAsState(if (expanded) Accent else textColor)
     val backgroundColor by animateColorAsState(
         if (expanded) Accent.copy(0.2f).compositeOver(theme.componentBackground)
-        else theme.componentBackground
+        else Color.Black.copy(alpha = 0.35f)
     )
     val chevronRotation by animateFloatAsState(if (expanded) 0f else 180f)
 
@@ -96,15 +101,16 @@ fun ForkMultiSelectDropdown(
     val triggerLabel = formatMultiSelectLabel(count, options.size)
     val triggerPadding = ForkTokens.Padding.dropdownPadding
     val dotGap = ForkTokens.Padding.dropdownDotGap
+    RecordDropdownPopup(expanded, testKeyPrefix ?: testKey)
 
     Box(modifier = modifier.testBounds(testKey)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(ForkTokens.Size.dropdownTriggerHeight)
-                .onSizeChanged { triggerHeightPx = it.height }
-                .background(backgroundColor, theme.sideBarNavigationEntryShape)
-                .border(ForkTokens.Size.controlBorder, borderColor, theme.sideBarNavigationEntryShape)
+                .trackDropdownTrigger(trigger)
+                .background(backgroundColor, ForkTokens.controlShape)
+                .border(ForkTokens.Size.controlBorder, borderColor, ForkTokens.controlShape)
                 .onClick(triggerInteraction) { expanded = !expanded }
                 .hoverable(triggerInteraction)
                 .pointerHoverIcon(PointerIcon.Hand)
@@ -116,17 +122,18 @@ fun ForkMultiSelectDropdown(
                 triggerLabel,
                 modifier = Modifier.weight(1f, fill = false).padding(end = dotGap),
                 color = textColor,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Icon("up", modifier = Modifier.rotate(chevronRotation), color = textColor)
+            Icon("up", modifier = Modifier.rotate(chevronRotation), color = chevronColor)
         }
 
         if (expanded) {
             Popup(
                 alignment = Alignment.TopStart,
-                offset = IntOffset(0, triggerHeightPx + 10),
+                offset = IntOffset(0, trigger.heightPx + 4),
                 onDismissRequest = { expanded = false },
                 properties = PopupProperties(focusable = true),
             ) {
@@ -134,24 +141,30 @@ fun ForkMultiSelectDropdown(
                     val scrollState = rememberScrollState()
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(theme.sideBarNavigationEntryShape)
-                            .background(theme.componentBackground, theme.sideBarNavigationEntryShape)
-                            .border(ForkTokens.Size.controlBorder, theme.borderColor, theme.sideBarNavigationEntryShape)
+                            .width(dropdownTriggerWidthDp(trigger))
+                            .shadow(
+                                ForkTokens.Size.popupShadow,
+                                ForkTokens.controlShape,
+                                clip = false,
+                                ambientColor = Color.Black.copy(alpha = 0.5f),
+                                spotColor = Color.Black.copy(alpha = 0.5f),
+                            )
+                            .clip(ForkTokens.controlShape)
+                            .background(theme.componentBackground.copy(alpha = 1f), ForkTokens.controlShape)
+                            .border(ForkTokens.Size.controlBorder, Accent.copy(alpha = ForkTokens.Alpha.controlFill), ForkTokens.controlShape)
                     ) {
                         Column(
                             modifier = Modifier
                                 .heightIn(max = ForkTokens.Size.dropdownPopupMaxHeight)
                                 .verticalScroll(scrollState)
-                                .padding(vertical = ForkTokens.Padding.dropdownItemVertical, horizontal = ForkTokens.Padding.dropdownItemHorizontal)
                                 .fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(ForkTokens.Padding.dropdownItemGap),
                         ) {
                             options.forEachIndexed { index, option ->
                                 ForkMultiselectItem(
                                     label = option,
                                     checked = selectedFlags.getOrElse(index) { false },
                                     onToggle = { onToggle(index) },
+                                    testKey = testKeyPrefix?.let { "$it-item-$index" },
                                 )
                             }
                         }
@@ -167,18 +180,26 @@ private fun ForkMultiselectItem(
     label: String,
     checked: Boolean,
     onToggle: () -> Unit,
+    testKey: String? = null,
 ) {
     val theme = LocalTheme.current
     val interactionSource = rememberInteractionSource()
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val contentColor by animateColorAsState(
-        if (checked || isHovered) theme.textColor else theme.textColorSecondary
+        if (checked) Accent else if (isHovered) theme.textColor else theme.textColorSecondary
     )
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(ForkTokens.Size.dropdownRowHeight)
+            .testBounds(testKey)
+            .background(
+                Brush.horizontalGradient(
+                    listOf(Color.Transparent, Accent.copy(alpha = ForkTokens.Alpha.popupFill)),
+                ),
+            )
             .clip(theme.sideBarNavigationEntryShape.concentric(ForkTokens.Padding.dropdownPadding))
             .onClick(interactionSource, onToggle)
             .hoverable(interactionSource)
@@ -189,19 +210,29 @@ private fun ForkMultiselectItem(
         Text(
             label,
             color = contentColor,
-            fontSize = 13.sp,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         if (checked) {
             Spacer(Modifier.width(ForkTokens.Padding.dropdownDotGap))
-            Box(
-                modifier = Modifier
-                    .size(ForkTokens.Size.dropdownDot)
-                    .clip(LocalTheme.current.circleShape)
-                    .background(Accent),
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .size(ForkTokens.Padding.checkboxDot)
+                        .clip(LocalTheme.current.circleShape)
+                        .background(Accent.copy(alpha = ForkTokens.Alpha.glowHalo))
+                        .blur(ForkTokens.Size.checkboxGlow),
+                )
+                Box(
+                    modifier = Modifier
+                        .size(ForkTokens.Size.dropdownDot)
+                        .clip(LocalTheme.current.circleShape)
+                        .background(Accent),
+                )
+            }
         }
     }
 }
