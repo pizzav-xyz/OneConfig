@@ -231,6 +231,15 @@ public class ConfigUIClickTest {
             }
             screenshot("13-combat");
 
+            // 8. First REAL module: OneConfig preferences via the non-mock registry
+            tap("rail-misc");
+            if (!awaitBounds(new HashSet<>(Arrays.asList("real-oneconfig-toggle", "real-oneconfig-opacity")), 8000)) {
+                runner.fail("clickui: real OneConfig card never composed (registry miss?)");
+            } else {
+                runner.pass("clickui: real OneConfig card composed via ConfigRegistry.findTree(oneconfig.json)");
+            }
+            screenshot("14-real-module");
+
             closeAndFinish();
         } catch (Exception e) {
             runner.fail("clickui: exception: " + e.getMessage());

@@ -2,8 +2,10 @@ package org.polyfrost.oneconfig.internal.ui.layout.fork
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,21 +65,29 @@ fun ForkConfigSurface() {
                     modifier = Modifier,
                 )
 
-                ModuleGrid(
-                    modules = modules,
-                    onKeybindCapture = { module, key ->
-                        ForkTestHooks.record("keybind:${module.id}=$key")
-                    },
-                    onKeybindCancel = { module ->
-                        ForkTestHooks.record("keybind-cancel:${module.id}")
-                    },
-                    onModuleToggle = { module, enabled ->
-                        toggles = toggles + (module.id to enabled)
-                        ForkTestHooks.record("toggle:${module.id}=$enabled")
-                    },
-                    selectedCategory = selectedCategory,
-                    modifier = Modifier.weight(1f),
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    ModuleGrid(
+                        modules = modules,
+                        onKeybindCapture = { module, key ->
+                            ForkTestHooks.record("keybind:${module.id}=$key")
+                        },
+                        onKeybindCancel = { module ->
+                            ForkTestHooks.record("keybind-cancel:${module.id}")
+                        },
+                        onModuleToggle = { module, enabled ->
+                            toggles = toggles + (module.id to enabled)
+                            ForkTestHooks.record("toggle:${module.id}=$enabled")
+                        },
+                        selectedCategory = selectedCategory,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (selectedCategory == "misc") {
+                        // First REAL module: live OneConfig preferences from the
+                        // non-mock registry (oneconfig.json). Rendered alongside
+                        // the mock grid; mocks stay untouched (tasks.md 1.3).
+                        RealOneConfigCard(modifier = Modifier.fillMaxWidth())
+                    }
+                }
             }
         }
     }
