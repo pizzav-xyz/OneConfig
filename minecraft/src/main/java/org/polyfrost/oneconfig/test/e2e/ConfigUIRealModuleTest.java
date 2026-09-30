@@ -7,6 +7,7 @@ import org.polyfrost.oneconfig.api.config.v1.Property;
 import org.polyfrost.oneconfig.api.config.v1.Tree;
 import org.polyfrost.oneconfig.internal.OneConfigConfig;
 import org.polyfrost.oneconfig.internal.ThemeConfig;
+import org.polyfrost.oneconfig.internal.compat.ModMenuEntrypoint;
 import org.polyfrost.oneconfig.internal.ui.api.ConfigRegistry;
 import org.polyfrost.oneconfig.internal.ui.compose.ComposeScreen;
 import org.polyfrost.oneconfig.internal.ui.compose.impls.OneConfigUIScreen;
@@ -40,10 +41,16 @@ public class ConfigUIRealModuleTest {
 
     private final E2ETestRunner runner;
     private final Mode mode;
+    private final boolean viaModMenu;
 
     public ConfigUIRealModuleTest(E2ETestRunner runner, Mode mode) {
+        this(runner, mode, false);
+    }
+
+    public ConfigUIRealModuleTest(E2ETestRunner runner, Mode mode, boolean viaModMenu) {
         this.runner = runner;
         this.mode = mode;
+        this.viaModMenu = viaModMenu;
     }
 
     public void run() {
@@ -60,6 +67,54 @@ public class ConfigUIRealModuleTest {
         }
     }
 
+    private String tag() {
+        return viaModMenu ? "modmenu-demo" : "real-module";
+    }
+
+    private String shotPrefix() {
+        return viaModMenu ? "modmenu-demo" : "clickui";
+    }
+
+    /**
+     * Opens the config screen the way the demo mode requires: via the exact
+     * Mod Menu entry-point factory Mod Menu itself calls, or via direct
+     * construction for the registry-level path. Fails loud on any deviation.
+     */
+    private void openScreen() throws Exception {
+        if (!viaModMenu) {
+            callOnRender(() -> {
+                Platform.screen().display(new OneConfigUIScreen());
+                return null;
+            });
+            return;
+        }
+        Screen created = callOnRender(() -> {
+            try {
+                com.terraformersmc.modmenu.api.ConfigScreenFactory<?> factory =
+                        ModMenuEntrypoint.INSTANCE.getModConfigScreenFactory();
+                if (factory == null) return null;
+                Object screen = factory.create(Platform.screen().current());
+                return (Screen) screen;
+            } catch (Exception e) {
+                return null;
+            }
+        });
+        if (created == null) {
+            runner.fail(tag() + ": ModMenu factory produced no screen (entry missing or unlinked)");
+            return;
+        }
+        if (!(created instanceof OneConfigUIScreen)) {
+            runner.fail(tag() + ": ModMenu factory screen is not OneConfigUIScreen: " + created.getClass());
+            return;
+        }
+        runner.pass(tag() + ": ModMenu factory produced OneConfigUIScreen");
+        Screen toShow = created;
+        callOnRender(() -> {
+            Platform.screen().display(toShow);
+            return null;
+        });
+    }
+
     private void driveSet() throws Exception {
         Tree tree = ConfigRegistry.INSTANCE.findTree("oneconfig.json");
         if (tree == null) {
@@ -72,18 +127,15 @@ public class ConfigUIRealModuleTest {
         ThemeConfig.activeTheme = "Dark Orange Fork";
         ThemeRegistry.INSTANCE.loadFromConfig();
         ForkTestHooks.INSTANCE.clearEvents();
-        callOnRender(() -> {
-            Platform.screen().display(new OneConfigUIScreen());
-            return null;
-        });
+        openScreen();
         sleep(2500);
 
         if (!isConfigOpen()) {
-            runner.fail("real-module: OneConfigUIScreen did not open");
+            runner.fail(tag() + ": OneConfigUIScreen did not open");
             runner.fail("all");
             return;
         }
-        runner.pass("real-module: screen open");
+        runner.pass(tag() + ": screen open");
 
         tap("rail-misc");
         Set<String> required = new HashSet<>(Arrays.asList("real-oneconfig-toggle", "real-oneconfig-opacity"));
@@ -140,13 +192,10 @@ public class ConfigUIRealModuleTest {
 
         ThemeConfig.activeTheme = "Dark Orange Fork";
         ThemeRegistry.INSTANCE.loadFromConfig();
-        callOnRender(() -> {
-            Platform.screen().display(new OneConfigUIScreen());
-            return null;
-        });
+        openScreen();
         sleep(2500);
         if (!isConfigOpen()) {
-            runner.fail("real-module: screen did not open on verify launch");
+            runner.fail(tag() + ": screen did not open on verify launch");
             runner.fail("all");
             return;
         }
@@ -273,7 +322,7 @@ public class ConfigUIRealModuleTest {
     }
 
     private void screenshot(String step) throws Exception {
-        String name = "clickui-" + step;
+        String name = shotPrefix() + "-" + step;
         long since = System.currentTimeMillis();
         callOnRender(() -> {
             try {
