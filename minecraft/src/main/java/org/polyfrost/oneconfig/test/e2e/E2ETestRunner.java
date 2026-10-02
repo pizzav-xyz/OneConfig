@@ -29,6 +29,8 @@ public class E2ETestRunner {
         tests.put("clickui-real-module-verify", r -> new ConfigUIRealModuleTest(r, ConfigUIRealModuleTest.Mode.VERIFY).run());
         tests.put("modmenu-demo", r -> new ConfigUIRealModuleTest(r, ConfigUIRealModuleTest.Mode.SET, true).run());
         tests.put("modmenu-demo-verify", r -> new ConfigUIRealModuleTest(r, ConfigUIRealModuleTest.Mode.VERIFY, true).run());
+        tests.put("preference-demo", r -> new ConfigUIRealModuleTest(r, ConfigUIRealModuleTest.Mode.PREFERENCE_SET, true).run());
+        tests.put("preference-demo-verify", r -> new ConfigUIRealModuleTest(r, ConfigUIRealModuleTest.Mode.PREFERENCE_VERIFY, true).run());
     }
 
     public static void init() {

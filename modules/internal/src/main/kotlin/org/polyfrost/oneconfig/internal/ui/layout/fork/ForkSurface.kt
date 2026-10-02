@@ -86,6 +86,7 @@ fun ForkConfigSurface() {
                         // non-mock registry (oneconfig.json). Rendered alongside
                         // the mock grid; mocks stay untouched (tasks.md 1.3).
                         RealOneConfigCard(modifier = Modifier.fillMaxWidth())
+                        AppearanceCard(modifier = Modifier.fillMaxWidth())
                     }
                 }
             }

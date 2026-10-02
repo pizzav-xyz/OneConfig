@@ -287,6 +287,8 @@ class RadioButtonOptionData(prop: Property<*>) : OptionData(prop) {
 
 class ColorOptionData(prop: Property<*>) : OptionData(prop) {
     val alpha = prop.getMetadata<Any>("noAlpha") == null
+    var pickerTestKey: String? = null
+    var onPickerCommitArgb: ((Int) -> Unit)? = null
 }
 
 class KeybindOptionData(prop: Property<*>) : OptionData(prop)

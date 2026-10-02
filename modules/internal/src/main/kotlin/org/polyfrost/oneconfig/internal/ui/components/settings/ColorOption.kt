@@ -57,6 +57,7 @@ import org.polyfrost.oneconfig.api.config.v1.Property
 import org.polyfrost.oneconfig.api.ui.v1.keybind.trackTextInputFocus
 import org.polyfrost.oneconfig.internal.ui.api.settings.ColorOptionData
 import org.polyfrost.oneconfig.internal.ui.components.Icon
+import org.polyfrost.oneconfig.internal.ui.components.fork.testBounds
 import org.polyfrost.oneconfig.internal.ui.components.Text
 import org.polyfrost.oneconfig.internal.ui.components.onClick
 import org.polyfrost.oneconfig.internal.ui.components.rememberInteractionSource
@@ -240,6 +241,7 @@ fun ColorOption(data: ColorOptionData) {
 
             else -> (data.prop as Property<Any>).set(color)
         }
+        data.onPickerCommitArgb?.invoke(color.toArgb())
     }
 
     ChromaColorAnimation(pickerModel) {
@@ -274,6 +276,7 @@ fun ColorOption(data: ColorOptionData) {
                     onColorChanged = ::persistColor,
                     onClose = { expanded = false },
                     chromaCapable = data.prop.type == PolyColor::class.java,
+                    testKey = data.pickerTestKey,
                 )
             }
         }
@@ -286,6 +289,7 @@ internal fun ColorPickerPopup(
     onColorChanged: (Color) -> Unit,
     onClose: () -> Unit,
     chromaCapable: Boolean = true,
+    testKey: String? = null,
 ) {
     val theme = LocalTheme.current
     val hue = model.hue
@@ -306,6 +310,7 @@ internal fun ColorPickerPopup(
 
     Column(
         modifier = Modifier
+            .testBounds(testKey)
             .width(280.dp)
             .background(theme.popupBackground, PickerShape)
             .border(1.dp, theme.borderColor, PickerShape)
@@ -330,6 +335,7 @@ internal fun ColorPickerPopup(
         var sbPaneSize by remember { mutableStateOf(Size.Zero) }
         Box(
             modifier = Modifier
+                .testBounds(testKey?.let { "$it-pane" })
                 .fillMaxWidth()
                 .height(160.dp)
                 .clip(LocalTheme.current.sideBarNavigationEntryShape)

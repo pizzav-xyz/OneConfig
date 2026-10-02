@@ -7,7 +7,6 @@ import org.polyfrost.oneconfig.api.config.v1.Property;
 import org.polyfrost.oneconfig.api.config.v1.Tree;
 import org.polyfrost.oneconfig.internal.OneConfigConfig;
 import org.polyfrost.oneconfig.internal.ThemeConfig;
-import org.polyfrost.oneconfig.internal.compat.ModMenuEntrypoint;
 import org.polyfrost.oneconfig.internal.ui.api.ConfigRegistry;
 import org.polyfrost.oneconfig.internal.ui.compose.ComposeScreen;
 import org.polyfrost.oneconfig.internal.ui.compose.impls.OneConfigUIScreen;
@@ -37,7 +36,7 @@ import java.util.function.Supplier;
  * restart from disk, screenshots the persisted state, then restores defaults.
  */
 public class ConfigUIRealModuleTest {
-    public enum Mode { SET, VERIFY }
+    public enum Mode { SET, VERIFY, PREFERENCE_SET, PREFERENCE_VERIFY }
 
     private final E2ETestRunner runner;
     private final Mode mode;
@@ -60,26 +59,29 @@ public class ConfigUIRealModuleTest {
     private void drive() {
         try {
             if (mode == Mode.SET) driveSet();
-            else driveVerify();
+            else if (mode == Mode.VERIFY) driveVerify();
+            else if (mode == Mode.PREFERENCE_SET) drivePreferenceSet();
+            else drivePreferenceVerify();
         } catch (Exception e) {
-            runner.fail("real-module: exception: " + e.getMessage());
+            runner.fail(tag() + ": exception: " + e.getMessage());
             runner.fail("all");
         }
     }
 
+    private boolean isPreference() {
+        return mode == Mode.PREFERENCE_SET || mode == Mode.PREFERENCE_VERIFY;
+    }
+
     private String tag() {
+        if (isPreference()) return "preference-demo";
         return viaModMenu ? "modmenu-demo" : "real-module";
     }
 
     private String shotPrefix() {
+        if (isPreference()) return "preference-demo";
         return viaModMenu ? "modmenu-demo" : "clickui";
     }
 
-    /**
-     * Opens the config screen the way the demo mode requires: via the exact
-     * Mod Menu entry-point factory Mod Menu itself calls, or via direct
-     * construction for the registry-level path. Fails loud on any deviation.
-     */
     private void openScreen() throws Exception {
         if (!viaModMenu) {
             callOnRender(() -> {
@@ -88,31 +90,7 @@ public class ConfigUIRealModuleTest {
             });
             return;
         }
-        Screen created = callOnRender(() -> {
-            try {
-                com.terraformersmc.modmenu.api.ConfigScreenFactory<?> factory =
-                        ModMenuEntrypoint.INSTANCE.getModConfigScreenFactory();
-                if (factory == null) return null;
-                Object screen = factory.create(Platform.screen().current());
-                return (Screen) screen;
-            } catch (Exception e) {
-                return null;
-            }
-        });
-        if (created == null) {
-            runner.fail(tag() + ": ModMenu factory produced no screen (entry missing or unlinked)");
-            return;
-        }
-        if (!(created instanceof OneConfigUIScreen)) {
-            runner.fail(tag() + ": ModMenu factory screen is not OneConfigUIScreen: " + created.getClass());
-            return;
-        }
-        runner.pass(tag() + ": ModMenu factory produced OneConfigUIScreen");
-        Screen toShow = created;
-        callOnRender(() -> {
-            Platform.screen().display(toShow);
-            return null;
-        });
+        ModMenuScreenOpener.displayViaModMenu(runner, tag());
     }
 
     private void driveSet() throws Exception {
@@ -208,6 +186,228 @@ public class ConfigUIRealModuleTest {
         }
         screenshot("real-module-03-after-restart");
         closeAndFinishRestore(true);
+    }
+
+    private void drivePreferenceSet() throws Exception {
+        org.polyfrost.oneconfig.api.config.v1.Tree themes =
+                org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE.themesTree();
+        org.polyfrost.oneconfig.api.config.v1.Tree config =
+                org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE.configTree();
+        if (themes == null || config == null) {
+            runner.fail(tag() + ": registry miss (themes=" + (themes != null) + " config=" + (config != null) + ")");
+            runner.fail("all");
+            return;
+        }
+        runner.pass(tag() + ": registry hit themes.json + oneconfig.json");
+
+        ThemeConfig.activeTheme = "Dark Orange Fork";
+        ThemeRegistry.INSTANCE.loadFromConfig();
+        ForkTestHooks.INSTANCE.clearEvents();
+        openScreen();
+        sleep(2500);
+        if (!isConfigOpen()) {
+            runner.fail(tag() + ": OneConfigUIScreen did not open");
+            runner.fail("all");
+            return;
+        }
+        runner.pass(tag() + ": screen open");
+
+        tap("rail-misc");
+        Set<String> required = new HashSet<>(Arrays.asList("appearance-accent", "appearance-scale", "appearance-theme"));
+        if (!awaitBounds(required, 10000)) {
+            runner.fail(tag() + ": appearance hooks missing: " + missing(required));
+            runner.fail("all");
+            closeAndFinish();
+            return;
+        }
+        runner.pass(tag() + ": appearance card composed with accent + scale + theme rows");
+        screenshot("preference-00-open");
+
+        int beforeArgb = org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE
+                .readAccentArgb(themes);
+        tap("appearance-accent");
+        if (!awaitBounds(new HashSet<>(Arrays.asList("appearance-picker-pane")), 5000)) {
+            runner.fail(tag() + ": colour picker never opened");
+            runner.fail("all");
+            closeAndFinish();
+            return;
+        }
+        runner.pass(tag() + ": colour picker opened");
+        dragVertical("appearance-picker-pane");
+        assertEventsStartWith("accent:appearance=", "accent commit did not fire");
+        org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE.saveThemes();
+        int afterArgb = org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE
+                .readAccentArgb(themes);
+        if (afterArgb == beforeArgb) {
+            runner.fail(tag() + ": picker drag did not change accent");
+        } else {
+            runner.pass(tag() + ": accent changed live " + hex(beforeArgb) + " -> " + hex(afterArgb));
+        }
+        String themesJson = readFileText("themes.json");
+        if (themesJson != null && themesJson.replaceAll("\\s+", "").contains(rgbaArray(afterArgb))) {
+            runner.pass(tag() + ": themes.json holds picked accent " + rgbaArray(afterArgb));
+        } else {
+            runner.fail(tag() + ": themes.json missing picked accent");
+        }
+        screenshot("preference-01-accent");
+
+                tap("appearance-toggle");
+        dragToFraction("appearance-scale", 2f / 3f);        float size = lastSliderValue("slider:appearance-scale=");
+        if (Float.isNaN(size) || Math.abs(size - 3.0f) > 0.26f) {
+            runner.fail(tag() + ": scale slider did not reach 3.0 (was " + size + ")");
+        } else {
+            runner.pass(tag() + ": scale slider at " + size + " with custom-size enabled");
+        }
+        screenshot("preference-02-scale");
+
+        java.util.List<String> names =
+                org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE.themeNames();
+        int forkIndex = names.indexOf("Dark Orange Fork");
+        tap("appearance-theme");
+        if (!awaitBounds(new HashSet<>(Arrays.asList("appearance-theme-item-" + Math.max(forkIndex, 0))), 5000)) {
+            runner.fail(tag() + ": theme popup never opened");
+            runner.fail("all");
+            closeAndFinish();
+            return;
+        }
+        tap("appearance-theme-item-" + forkIndex);
+        assertEventsContain(
+                "dropdown:appearance-theme=Dark Orange Fork", "theme selection did not fire");
+        if (!"Dark Orange Fork".equals(ThemeConfig.activeTheme)) {
+            runner.fail(tag() + ": active theme is not Dark Orange Fork after select");
+        } else {
+            runner.pass(tag() + ": theme persisted as Dark Orange Fork");
+        }
+        screenshot("preference-03-theme");
+
+        org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE.saveThemes();
+        org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE.saveConfig();
+        logFileValues("preference-after-set");
+        closeAndFinish();
+    }
+
+    private void drivePreferenceVerify() throws Exception {
+        org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance fa =
+                org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE;
+        org.polyfrost.oneconfig.api.config.v1.Tree themes = fa.themesTree();
+        int accentArgb = fa.readAccentArgb(themes);
+        String themesJson = readFileText("themes.json");
+        boolean peach = accentArgb == 0xFFFF9676;
+        if (peach) {
+            runner.fail(tag() + ": accent still stock peach — SET pick did not survive restart");
+        } else {
+            runner.pass(tag() + ": accent survived restart (" + hex(accentArgb) + ")");
+        }
+        if (themesJson != null && themesJson.replaceAll("\\s+", "").contains(rgbaArray(accentArgb))) {
+            runner.pass(tag() + ": file matches live accent");
+        } else {
+            runner.fail(tag() + ": file does not match live accent");
+        }
+        boolean custom = OneConfigConfig.useCustomUiSize;
+        float size = OneConfigConfig.uiPixelSize;
+        if (!custom || Math.abs(size - 3.0f) > 0.01f) {
+            runner.fail(tag() + ": scale did not survive restart (custom=" + custom + " size=" + size + ")");
+        } else {
+            runner.pass(tag() + ": scale survived restart (custom true, 3.0)");
+        }
+        if (!"Dark Orange Fork".equals(ThemeConfig.activeTheme)) {
+            runner.fail(tag() + ": theme did not survive restart (" + ThemeConfig.activeTheme + ")");
+        } else {
+            runner.pass(tag() + ": theme survived restart (Dark Orange Fork)");
+        }
+
+        ThemeRegistry.INSTANCE.loadFromConfig();
+        openScreen();
+        sleep(2500);
+        if (!isConfigOpen()) {
+            runner.fail(tag() + ": screen did not open on verify launch");
+            runner.fail("all");
+            return;
+        }
+        tap("rail-misc");
+        if (!awaitBounds(new HashSet<>(Arrays.asList("appearance-accent")), 10000)) {
+            runner.fail(tag() + ": appearance card missing after restart");
+            runner.fail("all");
+            closeAndFinishRestorePreferences(false);
+            return;
+        }
+        screenshot("preference-04-after-restart");
+        closeAndFinishRestorePreferences(true);
+    }
+
+    private void closeAndFinishRestorePreferences(boolean restore) throws Exception {
+        if (restore) {
+            faWriteDefaults();
+        }
+        closeAndFinish();
+    }
+
+    private void faWriteDefaults() throws Exception {
+        org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance fa =
+                org.polyfrost.oneconfig.internal.ui.layout.fork.ForkAppearance.INSTANCE;
+        fa.writeAccentArgb(fa.themesTree(), fa.FALLBACK_ACCENT_ARGB);
+        fa.writeScale(fa.configTree(), false, 2.0f);
+        runner.pass(tag() + ": restored accent peach + scale 2.0/off, suite leaves no dirty state");
+    }
+
+    private void dragVertical(String key) throws Exception {
+        ForkTestHooks.Bounds b = awaitNonZeroBounds(key, 3000);
+        final float x = b.getCenterX();
+        final float y0 = b.getY() + 4f;
+        final float y1 = b.getY() + b.getHeight() * 0.5f;
+        boolean ok = callOnRender(() -> screen().testDrag(x, y0, x, y1, 16));
+        if (!ok) throw new IllegalStateException("scene unavailable for drag " + key);
+        runner.pass(tag() + ": dragged " + key + " vertically");
+        sleep(600);
+    }
+
+    private void assertEventsStartWith(String prefix, String message) {
+        List<String> events = ForkTestHooks.INSTANCE.eventsSnapshot();
+        for (String e : events) {
+            if (e.startsWith(prefix)) {
+                runner.pass(tag() + ": event " + e);
+                return;
+            }
+        }
+        runner.fail(tag() + ": " + message + " (events=" + events + ")");
+    }
+
+    private void dragToFraction(String key, float fraction) throws Exception {
+        ForkTestHooks.Bounds b = awaitNonZeroBounds(key, 3000);
+        final float y = b.getCenterY();
+        final float x0 = b.getX() + 2f;
+        final float x1 = b.getX() + b.getWidth() * fraction;
+        boolean ok = callOnRender(() -> screen().testDrag(x0, y, x1, y, 16));
+        if (!ok) throw new IllegalStateException("scene unavailable for drag " + key);
+        runner.pass(tag() + ": dragged " + key + " to fraction " + fraction);
+        sleep(600);
+    }
+
+    private static String hex(int argb) {
+        return String.format("#%08X", argb);
+    }
+
+    private static String rgbaArray(int argb) {
+        int r = (argb >> 16) & 0xFF;
+        int g = (argb >> 8) & 0xFF;
+        int b = argb & 0xFF;
+        int a = (argb >>> 24) & 0xFF;
+        return "[" + r + "," + g + "," + b + "," + a + "]";
+    }
+
+    private String readFileText(String name) {
+        try {
+            Path dir = ConfigManager.active().getFolder();
+            Path file = dir.resolve(name);
+            if (!java.nio.file.Files.exists(file)) {
+                runner.fail(tag() + ": config file missing: " + file);
+                return null;
+            }
+            return new String(java.nio.file.Files.readAllBytes(file), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            runner.fail(tag() + ": file read failed: " + e.getMessage());
+            return null;
+        }
     }
 
     private void closeAndFinishRestore(boolean restore) throws Exception {
