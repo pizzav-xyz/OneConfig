@@ -1,5 +1,7 @@
 ## Why
 
+> **ABANDONED 2026-09-30:** pixel-parity against an opaque Figma export that was never provided cannot converge — 68 audit items closed no-change; the surface ships as-is and further work moved to behavior changes.
+
 OneConfig already ships a Compose-based in-game config UI, but the Fork's target is narrower: the Figma's module-card grid (dark-orange palette, glass-panel semantics, sidebar + 2-col cards + a fixed set of row controls). Rather than stripping the codebase down, the change builds the new surface **on top of** the existing stack — new theme, new layout, and a focused control set — and scopes out what the Fork chooses not to exercise.
 
 ## What Changes
